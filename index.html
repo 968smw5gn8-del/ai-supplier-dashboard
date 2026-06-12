@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Supplier Valuation Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --card-bg: #0f172a;
+      --accent: #38bdf8;
+      --accent-soft: #0ea5e9;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #22c55e;
+      --border: #1f2937;
+      --radius: 14px;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 12px 32px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span.logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #38bdf8);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      max-width: 640px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .toolbar button,
+    .toolbar select {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .toolbar button.primary {
+      background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+      border: none;
+      color: #0b1120;
+      font-weight: 600;
+      box-shadow: 0 10px 24px rgba(56, 189, 248, 0.45);
+    }
+
+    .toolbar button svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 960px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      background: linear-gradient(145deg, #020617, #0b1120);
+      border-radius: var(--radius);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      box-shadow: var(--shadow);
+      padding: 12px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 60%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticker {
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .company-name {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .category-pill {
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .live-price {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .live-price span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+
+    .section-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-text {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .metric {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .metric span.value {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .gauge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .gauge-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      min-width: 52px;
+    }
+
+    .gauge-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gauge-indicator {
+      position: absolute;
+      top: -2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #0b1120;
+      border: 2px solid #e5e7eb;
+      box-shadow: 0 0 8px rgba(148, 163, 184, 0.9);
+      transform: translateX(-50%);
+    }
+
+    .gauge-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .gauge-text.buy {
+      color: var(--success);
+    }
+
+    .gauge-text.sell {
+      color: var(--danger);
+    }
+
+    .gauge-text.hold {
+      color: var(--warning);
+    }
+
+    .gauge-text.wait {
+      color: var(--muted);
+    }
+
+    .inputs-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .input-group label {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .input-group input {
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      width: 100%;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+    }
+
+    .intrinsic-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 0.78rem;
+    }
+
+    .intrinsic-row span.value {
+      font-weight: 600;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .footer-note strong {
+      color: var(--accent);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>
+        <span class="logo-dot"></span>
+        AI Supplier Valuation Grid
+      </h1>
+      <p>
+        Mobile‑first dashboard for intrinsic value modeling of AI infrastructure suppliers.  
+        Live prices refresh every 60 seconds via Yahoo Finance; you can tweak assumptions per company and
+        see buy/sell/hold/wait signals update in real time.
+      </p>
+    </header>
+
+    <div class="toolbar">
+      <button class="primary" id="addCompanyBtn">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="#0b1120" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        Add company
+      </button>
+      <button id="refreshNowBtn">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 4v6h6M20 20v-6h-6" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round" />
+          <path d="M5 13a7 7 0 0 0 11 4" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        Refresh prices
+      </button>
+      <select id="currencySelect">
+        <option value="USD">USD</option>
+      </select>
+      <span style="font-size:0.75rem;color:var(--muted);">
+        Live data: Yahoo Finance (60s interval)
+      </span>
+    </div>
+
+    <div class="grid" id="companyGrid"></div>
+
+    <p class="footer-note">
+      This page is a <strong>client‑side single‑page app</strong> designed for GitHub Pages deployment.
+      All modeling is local to your browser. Live data uses public Yahoo Finance endpoints via
+      <code>fetch</code>; for production, consider adding a small proxy/API layer to handle rate limits and CORS.
+      Nothing here is investment advice—just a sandbox for thinking clearly.
+    </p>
+  </div>
+
+  <script>
+    // --- Core data model ------------------------------------------------------
+    const companies = [
+      {
+        ticker: "IFX.DE",
+        name: "Infineon Technologies",
+        category: "Power ICs / Memory",
+        profile:
+          "Deep in the AI power‑delivery stack; critical for GPU/CPU boards but not yet repriced like leading memory names.",
+        livePrice: null,
+        pe: 18,
+        evEbitda: 10,
+        assumptions: {
+          growthRate: 0.08, // 8% annual
+          discountRate: 0.11, // 11%
+          margin: 0.18,
+          years: 5
+        }
+      },
+      {
+        ticker: "STM",
+        name: "STMicroelectronics",
+        category: "Embedded Memory / Power",
+        profile:
+          "Essential embedded memory and power components for AI servers; trades more like a cyclical than an AI beneficiary.",
+        livePrice: null,
+        pe: 16,
+        evEbitda: 9,
+        assumptions: {
+          growthRate: 0.07,
+          discountRate: 0.11,
+          margin: 0.17,
+          years: 5
+        }
+      },
+      {
+        ticker: "2408.TW",
+        name: "Nanya Technology",
+        category: "DRAM",
+        profile:
+          "Mid‑tier DRAM supplier; high torque to memory cycles. AI demand can tighten DRAM supply and lift pricing.",
+        livePrice: null,
+        pe: null,
+        evEbitda: 8,
+        assumptions: {
+          growthRate: 0.10,
+          discountRate: 0.13,
+          margin: 0.15,
+          years: 5
+        }
+      },
+      {
+        ticker: "DELL",
+        name: "Dell Technologies",
+        category: "AI Servers",
+        profile:
+          "Major AI server vendor with large hyperscaler exposure; forecasts substantial AI server revenue but still trades at modest multiples.",
+        livePrice: null,
+        pe: 13,
+        evEbitda: 8,
+        assumptions: {
+          growthRate: 0.09,
+          discountRate: 0.11,
+          margin: 0.12,
+          years: 5
+        }
+      },
+      {
+        ticker: "WDC",
+        name: "Western Digital",
+        category: "NAND / Storage",
+        profile:
+          "Storage demand rises with AI clusters; structurally levered to data growth but has lagged some memory peers.",
+        livePrice: null,
+        pe: null,
+        evEbitda: 9,
+        assumptions: {
+          growthRate: 0.09,
+          discountRate: 0.12,
+          margin: 0.14,
+          years: 5
+        }
+      },
+      {
+        ticker: "ORCL",
+        name: "Oracle",
+        category: "AI Cloud Infrastructure",
+        profile:
+          "Cloud infrastructure provider with large AI‑related capex; recent pullback after spending announcements creates asymmetry.",
+        livePrice: null,
+        pe: 22,
+        evEbitda: 12,
+        assumptions: {
+          growthRate: 0.07,
+          discountRate: 0.10,
+          margin: 0.25,
+          years: 5
+        }
+      }
+    ];
+
+    // --- Yahoo Finance fetch (client‑side) -----------------------------------
+    async function fetchLivePrice(ticker) {
+      // NOTE: This uses Yahoo Finance's public quote endpoint.
+      // For production, consider a backend proxy to handle CORS and rate limits.
+      const url =
+        "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" +
+        encodeURIComponent(ticker);
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network error");
+        const data = await res.json();
+        const quote = data?.quoteResponse?.result?.[0];
+        if (!quote) return null;
+        return quote.regularMarketPrice ?? null;
+      } catch (err) {
+        console.warn("Price fetch failed for", ticker, err);
+        return null;
+      }
+    }
+
+    async function refreshAllPrices() {
+      const grid = document.getElementById("companyGrid");
+      const cards = grid.querySelectorAll(".card");
+      for (let i = 0; i < companies.length; i++) {
+        const c = companies[i];
+        const price = await fetchLivePrice(c.ticker);
+        c.livePrice = price;
+        const card = cards[i];
+        if (!card) continue;
+        const priceEl = card.querySelector(".live-price");
+        if (priceEl) {
+          if (price != null) {
+            priceEl.innerHTML =
+              "$" + price.toFixed(2) + '<span> live</span>';
+          } else {
+            priceEl.innerHTML = "N/A<span> live</span>";
+          }
+        }
+        updateIntrinsicAndGauge(card, c);
+      }
+    }
+
+    // --- Intrinsic value modeling --------------------------------------------
+    function computeIntrinsicValue(currentPrice, assumptions) {
+      // Simple DCF‑style heuristic:
+      // intrinsic ≈ currentPrice * (1 + growthRate)^years / (1 + discountRate)^years
+      if (!currentPrice || currentPrice <= 0) return null;
+      const { growthRate, discountRate, years } = assumptions;
+      const growthFactor = Math.pow(1 + (growthRate || 0), years || 5);
+      const discountFactor = Math.pow(1 + (discountRate || 0.1), years || 5);
+      const intrinsic = currentPrice * (growthFactor / discountFactor);
+      return intrinsic;
+    }
+
+    function classifySignal(currentPrice, intrinsic) {
+      if (!currentPrice || !intrinsic) return { label: "wait", pos: 50 };
+      const diff = (intrinsic - currentPrice) / currentPrice;
+
+      if (diff >= 0.25) {
+        return { label: "buy", pos: 80 };
+      } else if (diff >= 0.05) {
+        return { label: "hold", pos: 60 };
+      } else if (diff <= -0.15) {
+        return { label: "sell", pos: 20 };
+      } else {
+        return { label: "wait", pos: 45 };
+      }
+    }
+
+    // --- UI rendering --------------------------------------------------------
+    function createCard(company, index) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.index = index;
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div>
+            <div class="ticker">${company.ticker}</div>
+            <div class="company-name">${company.name}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="live-price">N/A<span> live</span></div>
+            <div class="category-pill">${company.category}</div>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="profile-text">${company.profile}</div>
+
+          <div class="metrics-row">
+            <div class="metric">
+              <span>P/E</span>
+              <span class="value">${company.pe != null ? company.pe : "N/A"}</span>
+            </div>
+            <div class="metric">
+              <span>EV/EBITDA</span>
+              <span class="value">${company.evEbitda != null ? company.evEbitda : "N/A"}</span>
+            </div>
+          </div>
+
+          <div class="inputs-row">
+            <div class="input-group">
+              <label>Growth rate (annual, %)</label>
+              <input type="number" step="0.1" min="-50" max="50"
+                value="${(company.assumptions.growthRate * 100).toFixed(1)}"
+                data-field="growthRate" />
+            </div>
+            <div class="input-group">
+              <label>Discount rate (%, WACC)</label>
+              <input type="number" step="0.1" min="0" max="50"
+                value="${(company.assumptions.discountRate * 100).toFixed(1)}"
+                data-field="discountRate" />
+            </div>
+            <div class="input-group">
+              <label>Margin (net, %)</label>
+              <input type="number" step="0.1" min="-50" max="80"
+                value="${(company.assumptions.margin * 100).toFixed(1)}"
+                data-field="margin" />
+            </div>
+            <div class="input-group">
+              <label>Horizon (years)</label>
+              <input type="number" step="1" min="1" max="15"
+                value="${company.assumptions.years}"
+                data-field="years" />
+            </div>
+          </div>
+
+          <div class="intrinsic-row">
+            <span>Intrinsic value</span>
+            <span class="value intrinsic-value">N/A</span>
+          </div>
+
+          <div class="gauge-row">
+            <span class="gauge-label">Signal</span>
+            <div class="gauge-bar">
+              <div class="gauge-indicator"></div>
+            </div>
+            <span class="gauge-text wait">wait</span>
+          </div>
+        </div>
+      `;
+
+      // Wire up inputs
+      const inputs = card.querySelectorAll(".input-group input");
+      inputs.forEach((input) => {
+        input.addEventListener("input", () => {
+          const field = input.dataset.field;
+          let val = parseFloat(input.value);
+          if (isNaN(val)) return;
+          if (field === "growthRate" || field === "discountRate" || field === "margin") {
+            company.assumptions[field] = val / 100;
+          } else if (field === "years") {
+            company.assumptions[field] = Math.max(1, Math.round(val));
+          }
+          updateIntrinsicAndGauge(card, company);
+        });
+      });
+
+      return card;
+    }
+
+    function updateIntrinsicAndGauge(card, company) {
+      const intrinsicEl = card.querySelector(".intrinsic-value");
+      const gaugeIndicator = card.querySelector(".gauge-indicator");
+      const gaugeText = card.querySelector(".gauge-text");
+      const price = company.livePrice;
+
+      const intrinsic = computeIntrinsicValue(price, company.assumptions);
+      if (intrinsicEl) {
+        intrinsicEl.textContent =
+          intrinsic != null ? "$" + intrinsic.toFixed(2) : "N/A";
+      }
+
+      const signal = classifySignal(price, intrinsic);
+      if (gaugeIndicator) {
+        gaugeIndicator.style.left = signal.pos + "%";
+      }
+      if (gaugeText) {
+        gaugeText.textContent = signal.label;
+        gaugeText.className = "gauge-text " + signal.label;
+      }
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById("companyGrid");
+      grid.innerHTML = "";
+      companies.forEach((c, i) => {
+        const card = createCard(c, i);
+        grid.appendChild(card);
+      });
+    }
+
+    // --- Add company flow -----------------------------------------------------
+    function addCompanyPrompt() {
+      const ticker = prompt("Enter ticker symbol (e.g., NVDA):");
+      if (!ticker) return;
+      const name = prompt("Enter company name:");
+      const category = prompt("Enter category (e.g., GPUs / AI hardware):");
+      const profile =
+        prompt("Enter a short profile/description:") ||
+        "User‑added company; profile to be refined.";
+
+      const newCompany = {
+        ticker: ticker.trim().toUpperCase(),
+        name: name || ticker.trim().toUpperCase(),
+        category: category || "Custom",
+        profile,
+        livePrice: null,
+        pe: null,
+        evEbitda: null,
+        assumptions: {
+          growthRate: 0.08,
+          discountRate: 0.11,
+          margin: 0.15,
+          years: 5
+        }
+      };
+      companies.push(newCompany);
+      renderGrid();
+      refreshAllPrices();
+    }
+
+    // --- Init -----------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      renderGrid();
+      refreshAllPrices();
+
+      document
+        .getElementById("addCompanyBtn")
+        .addEventListener("click", addCompanyPrompt);
+
+      document
+        .getElementById("refreshNowBtn")
+        .addEventListener("click", refreshAllPrices);
+
+      // Auto refresh every 60 seconds
+      setInterval(refreshAllPrices, 60000);
+    });
+  </script>
+</body>
+</html>
