@@ -6,8 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #050816;
-      --card-bg: #0f172a;
+      /* Light theme (default) */
+      --bg-gradient: radial-gradient(circle at top, #f8fafc 0%, #f1f5f9 55%, #eef2f7 100%);
+      --card-bg: #ffffff;
+      --accent: #0ea5e9; /* sky-500 */
+      --accent-soft: #38bdf8; /* sky-400 */
+      --text: #0f1720;
+      --muted: #6b7280;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #22c55e;
+      --border: rgba(15, 23, 42, 0.06);
+      --radius: 14px;
+      --shadow: 0 8px 24px rgba(2, 6, 23, 0.06);
+      --card-padding: 12px 12px 14px;
+      --prism-gradient: conic-gradient(from 180deg at 50% 50%, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #5856d6, #ff2d55, #ff3b30);
+    }
+
+    /* Dark overrides */
+    body.dark-theme {
+      --bg-gradient: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
+      --card-bg: linear-gradient(145deg, #020617, #0b1120);
       --accent: #38bdf8;
       --accent-soft: #0ea5e9;
       --text: #e5e7eb;
@@ -15,9 +34,9 @@
       --danger: #ef4444;
       --warning: #f59e0b;
       --success: #22c55e;
-      --border: #1f2937;
-      --radius: 14px;
+      --border: rgba(255,255,255,0.04);
       --shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+      --prism-gradient: conic-gradient(from 180deg at 50% 50%, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #5856d6, #ff2d55, #ff3b30);
     }
 
     * {
@@ -27,9 +46,8 @@
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
       color: var(--text);
     }
 
@@ -59,14 +77,14 @@
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #22c55e, #38bdf8);
+      background: linear-gradient(135deg, #22c55e, var(--accent));
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
     }
 
     header p {
       font-size: 0.9rem;
       color: var(--muted);
-      max-width: 640px;
+      max-width: 720px;
     }
 
     .toolbar {
@@ -81,7 +99,7 @@
     .toolbar select {
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(255,255,255,0.6);
       color: var(--text);
       padding: 8px 14px;
       font-size: 0.85rem;
@@ -96,7 +114,7 @@
       border: none;
       color: #0b1120;
       font-weight: 600;
-      box-shadow: 0 10px 24px rgba(56, 189, 248, 0.45);
+      box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15);
     }
 
     .toolbar button svg {
@@ -123,25 +141,35 @@
     }
 
     .card {
-      background: linear-gradient(145deg, #020617, #0b1120);
+      position: relative;
       border-radius: var(--radius);
-      border: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 12px;
+      background: var(--card-bg);
       box-shadow: var(--shadow);
-      padding: 12px 12px 14px;
+      overflow: visible;
+      z-index: 0;
+      /* inner content styling */
+      padding: var(--card-padding);
       display: flex;
       flex-direction: column;
       gap: 8px;
-      position: relative;
-      overflow: hidden;
     }
 
+    /* Prism border effect using a pseudo-element + mask to create a border ring */
     .card::before {
       content: "";
       position: absolute;
-      inset: -40%;
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 60%);
-      opacity: 0.7;
+      inset: -1px;
+      z-index: -1;
+      border-radius: calc(var(--radius) + 2px);
+      background: var(--prism-gradient);
+      padding: 2px; /* thickness of the prism border */
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
       pointer-events: none;
+      filter: blur(8px) saturate(120%);
+      opacity: 0.85;
     }
 
     .card-header {
@@ -169,7 +197,7 @@
       font-size: 0.7rem;
       padding: 4px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.25);
       color: var(--muted);
       white-space: nowrap;
     }
@@ -177,13 +205,33 @@
     .live-price {
       font-size: 0.95rem;
       font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
     }
 
-    .live-price span {
-      font-size: 0.75rem;
+    .live-price .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .live-price .price-value {
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .live-price .price-tag {
+      font-size: 0.7rem;
       color: var(--muted);
-      font-weight: 400;
-      margin-left: 4px;
+      text-transform: lowercase;
+      background: transparent;
+    }
+
+    .live-price .price-meta {
+      font-size: 0.68rem;
+      color: var(--muted);
     }
 
     .section-row {
@@ -247,9 +295,9 @@
       width: 12px;
       height: 12px;
       border-radius: 999px;
-      background: #0b1120;
-      border: 2px solid #e5e7eb;
-      box-shadow: 0 0 8px rgba(148, 163, 184, 0.9);
+      background: var(--card-bg);
+      border: 2px solid var(--text);
+      box-shadow: 0 0 8px rgba(148, 163, 184, 0.2);
       transform: translateX(-50%);
     }
 
@@ -258,21 +306,10 @@
       font-weight: 600;
     }
 
-    .gauge-text.buy {
-      color: var(--success);
-    }
-
-    .gauge-text.sell {
-      color: var(--danger);
-    }
-
-    .gauge-text.hold {
-      color: var(--warning);
-    }
-
-    .gauge-text.wait {
-      color: var(--muted);
-    }
+    .gauge-text.buy { color: var(--success); }
+    .gauge-text.sell { color: var(--danger); }
+    .gauge-text.hold { color: var(--warning); }
+    .gauge-text.wait { color: var(--muted); }
 
     .inputs-row {
       display: grid;
@@ -281,56 +318,41 @@
       margin-top: 4px;
     }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .input-group label {
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
+    .input-group { display: flex; flex-direction: column; gap: 2px; }
+    .input-group label { font-size: 0.7rem; color: var(--muted); }
     .input-group input {
       border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.08);
+      background: rgba(255,255,255,0.9);
       color: var(--text);
       padding: 4px 8px;
       font-size: 0.75rem;
       width: 100%;
     }
 
+    body.dark-theme .input-group input {
+      background: rgba(15,23,42,0.6);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
     .input-group input:focus {
       outline: none;
       border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12);
     }
 
-    .intrinsic-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-      font-size: 0.78rem;
-    }
+    .intrinsic-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.78rem; }
+    .intrinsic-row span.value { font-weight: 600; }
 
-    .intrinsic-row span.value {
-      font-weight: 600;
-    }
+    .footer-note { margin-top: 18px; font-size: 0.7rem; color: var(--muted); max-width: 720px; }
+    .footer-note strong { color: var(--accent); font-weight: 500; }
 
-    .footer-note {
-      margin-top: 18px;
-      font-size: 0.7rem;
-      color: var(--muted);
-      max-width: 720px;
-    }
+    /* Theme toggle area */
+    .theme-toggle { margin-top: 12px; display:flex; justify-content:flex-end; align-items:center; gap:8px; }
+    .theme-toggle label { font-size:0.8rem; color:var(--muted); display:inline-flex; align-items:center; gap:8px; }
+    .theme-toggle input[type="checkbox"] { width:18px;height:18px; }
 
-    .footer-note strong {
-      color: var(--accent);
-      font-weight: 500;
-    }
   </style>
 </head>
 <body>
@@ -341,7 +363,7 @@
         AI Supplier Valuation Grid
       </h1>
       <p>
-        Mobile‑first dashboard for intrinsic value modeling of AI infrastructure suppliers.  
+        Mobile‑first dashboard for intrinsic value modeling of AI infrastructure suppliers.
         Live prices refresh every 60 seconds via Yahoo Finance; you can tweak assumptions per company and
         see buy/sell/hold/wait signals update in real time.
       </p>
@@ -349,24 +371,15 @@
 
     <div class="toolbar">
       <button class="primary" id="addCompanyBtn">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 5v14M5 12h14" stroke="#0b1120" stroke-width="2" stroke-linecap="round" />
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#0b1120" stroke-width="2" stroke-linecap="round" /></svg>
         Add company
       </button>
       <button id="refreshNowBtn">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M4 4v6h6M20 20v-6h-6" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round" />
-          <path d="M5 13a7 7 0 0 0 11 4" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round" />
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /><path d="M5 13a7 7 0 0 0 11 4" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /></svg>
         Refresh prices
       </button>
-      <select id="currencySelect">
-        <option value="USD">USD</option>
-      </select>
-      <span style="font-size:0.75rem;color:var(--muted);">
-        Live data: Yahoo Finance (60s interval)
-      </span>
+      <select id="currencySelect"><option value="USD">USD</option></select>
+      <span style="font-size:0.75rem;color:var(--muted);">Live data: Yahoo Finance (60s interval)</span>
     </div>
 
     <div class="grid" id="companyGrid"></div>
@@ -377,117 +390,39 @@
       <code>fetch</code>; for production, consider adding a small proxy/API layer to handle rate limits and CORS.
       Nothing here is investment advice—just a sandbox for thinking clearly.
     </p>
+
+    <div class="theme-toggle">
+      <label>
+        <input type="checkbox" id="themeToggle" />
+        Dark mode
+      </label>
+    </div>
   </div>
 
   <script>
+    // --- Local persistence helpers -------------------------------------------
+    const STORAGE_KEY = 'ai_supplier_last_prices_v1';
+    const THEME_KEY = 'ai_supplier_theme_v1';
+
+    function loadLastPrices() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; } }
+    function saveLastPrices(obj) { localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
+
+    function loadTheme() { return localStorage.getItem(THEME_KEY) || 'light'; }
+    function saveTheme(theme) { localStorage.setItem(THEME_KEY, theme); }
+
     // --- Core data model ------------------------------------------------------
     const companies = [
-      {
-        ticker: "IFX.DE",
-        name: "Infineon Technologies",
-        category: "Power ICs / Memory",
-        profile:
-          "Deep in the AI power‑delivery stack; critical for GPU/CPU boards but not yet repriced like leading memory names.",
-        livePrice: null,
-        pe: 18,
-        evEbitda: 10,
-        assumptions: {
-          growthRate: 0.08, // 8% annual
-          discountRate: 0.11, // 11%
-          margin: 0.18,
-          years: 5
-        }
-      },
-      {
-        ticker: "STM",
-        name: "STMicroelectronics",
-        category: "Embedded Memory / Power",
-        profile:
-          "Essential embedded memory and power components for AI servers; trades more like a cyclical than an AI beneficiary.",
-        livePrice: null,
-        pe: 16,
-        evEbitda: 9,
-        assumptions: {
-          growthRate: 0.07,
-          discountRate: 0.11,
-          margin: 0.17,
-          years: 5
-        }
-      },
-      {
-        ticker: "2408.TW",
-        name: "Nanya Technology",
-        category: "DRAM",
-        profile:
-          "Mid‑tier DRAM supplier; high torque to memory cycles. AI demand can tighten DRAM supply and lift pricing.",
-        livePrice: null,
-        pe: null,
-        evEbitda: 8,
-        assumptions: {
-          growthRate: 0.10,
-          discountRate: 0.13,
-          margin: 0.15,
-          years: 5
-        }
-      },
-      {
-        ticker: "DELL",
-        name: "Dell Technologies",
-        category: "AI Servers",
-        profile:
-          "Major AI server vendor with large hyperscaler exposure; forecasts substantial AI server revenue but still trades at modest multiples.",
-        livePrice: null,
-        pe: 13,
-        evEbitda: 8,
-        assumptions: {
-          growthRate: 0.09,
-          discountRate: 0.11,
-          margin: 0.12,
-          years: 5
-        }
-      },
-      {
-        ticker: "WDC",
-        name: "Western Digital",
-        category: "NAND / Storage",
-        profile:
-          "Storage demand rises with AI clusters; structurally levered to data growth but has lagged some memory peers.",
-        livePrice: null,
-        pe: null,
-        evEbitda: 9,
-        assumptions: {
-          growthRate: 0.09,
-          discountRate: 0.12,
-          margin: 0.14,
-          years: 5
-        }
-      },
-      {
-        ticker: "ORCL",
-        name: "Oracle",
-        category: "AI Cloud Infrastructure",
-        profile:
-          "Cloud infrastructure provider with large AI‑related capex; recent pullback after spending announcements creates asymmetry.",
-        livePrice: null,
-        pe: 22,
-        evEbitda: 12,
-        assumptions: {
-          growthRate: 0.07,
-          discountRate: 0.10,
-          margin: 0.25,
-          years: 5
-        }
-      }
+      { ticker: "IFX.DE", name: "Infineon Technologies", category: "Power ICs / Memory", profile: "Deep in the AI power‑delivery stack; critical for GPU/CPU boards but not yet repriced like leading memory names.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 18, evEbitda: 10, assumptions: { growthRate: 0.08, discountRate: 0.11, margin: 0.18, years: 5 } },
+      { ticker: "STM", name: "STMicroelectronics", category: "Embedded Memory / Power", profile: "Essential embedded memory and power components for AI servers; trades more like a cyclical than an AI beneficiary.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 16, evEbitda: 9, assumptions: { growthRate: 0.07, discountRate: 0.11, margin: 0.17, years: 5 } },
+      { ticker: "2408.TW", name: "Nanya Technology", category: "DRAM", profile: "Mid‑tier DRAM supplier; high torque to memory cycles. AI demand can tighten DRAM supply and lift pricing.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: 8, assumptions: { growthRate: 0.10, discountRate: 0.13, margin: 0.15, years: 5 } },
+      { ticker: "DELL", name: "Dell Technologies", category: "AI Servers", profile: "Major AI server vendor with large hyperscaler exposure; forecasts substantial AI server revenue but still trades at modest multiples.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 13, evEbitda: 8, assumptions: { growthRate: 0.09, discountRate: 0.11, margin: 0.12, years: 5 } },
+      { ticker: "WDC", name: "Western Digital", category: "NAND / Storage", profile: "Storage demand rises with AI clusters; structurally levered to data growth but has lagged some memory peers.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: 9, assumptions: { growthRate: 0.09, discountRate: 0.12, margin: 0.14, years: 5 } },
+      { ticker: "ORCL", name: "Oracle", category: "AI Cloud Infrastructure", profile: "Cloud infrastructure provider with large AI‑related capex; recent pullback after spending announcements creates asymmetry.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 22, evEbitda: 12, assumptions: { growthRate: 0.07, discountRate: 0.10, margin: 0.25, years: 5 } }
     ];
 
     // --- Yahoo Finance fetch (client‑side) -----------------------------------
     async function fetchLivePrice(ticker) {
-      // NOTE: This uses Yahoo Finance's public quote endpoint.
-      // For production, consider a backend proxy to handle CORS and rate limits.
-      const url =
-        "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" +
-        encodeURIComponent(ticker);
-
+      const url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + encodeURIComponent(ticker);
       try {
         const res = await fetch(url);
         if (!res.ok) throw new Error("Network error");
@@ -504,29 +439,35 @@
     async function refreshAllPrices() {
       const grid = document.getElementById("companyGrid");
       const cards = grid.querySelectorAll(".card");
+      const lastPrices = loadLastPrices();
+
       for (let i = 0; i < companies.length; i++) {
         const c = companies[i];
         const price = await fetchLivePrice(c.ticker);
-        c.livePrice = price;
-        const card = cards[i];
-        if (!card) continue;
-        const priceEl = card.querySelector(".live-price");
-        if (priceEl) {
-          if (price != null) {
-            priceEl.innerHTML =
-              "$" + price.toFixed(2) + '<span> live</span>';
-          } else {
-            priceEl.innerHTML = "N/A<span> live</span>";
+        if (price != null) {
+          c.livePrice = price;
+          c.lastKnownPrice = price;
+          c.lastUpdated = new Date().toISOString();
+          lastPrices[c.ticker] = { price: price, ts: c.lastUpdated };
+          saveLastPrices(lastPrices);
+        } else {
+          c.livePrice = null; // keep lastKnownPrice if present
+          // attempt to restore from stored lastPrices
+          if (lastPrices[c.ticker]) {
+            c.lastKnownPrice = lastPrices[c.ticker].price;
+            c.lastUpdated = lastPrices[c.ticker].ts;
           }
         }
+
+        const card = cards[i];
+        if (!card) continue;
+        updatePriceDisplay(card, c);
         updateIntrinsicAndGauge(card, c);
       }
     }
 
     // --- Intrinsic value modeling --------------------------------------------
     function computeIntrinsicValue(currentPrice, assumptions) {
-      // Simple DCF‑style heuristic:
-      // intrinsic ≈ currentPrice * (1 + growthRate)^years / (1 + discountRate)^years
       if (!currentPrice || currentPrice <= 0) return null;
       const { growthRate, discountRate, years } = assumptions;
       const growthFactor = Math.pow(1 + (growthRate || 0), years || 5);
@@ -539,15 +480,10 @@
       if (!currentPrice || !intrinsic) return { label: "wait", pos: 50 };
       const diff = (intrinsic - currentPrice) / currentPrice;
 
-      if (diff >= 0.25) {
-        return { label: "buy", pos: 80 };
-      } else if (diff >= 0.05) {
-        return { label: "hold", pos: 60 };
-      } else if (diff <= -0.15) {
-        return { label: "sell", pos: 20 };
-      } else {
-        return { label: "wait", pos: 45 };
-      }
+      if (diff >= 0.25) return { label: "buy", pos: 80 };
+      else if (diff >= 0.05) return { label: "hold", pos: 60 };
+      else if (diff <= -0.15) return { label: "sell", pos: 20 };
+      else return { label: "wait", pos: 45 };
     }
 
     // --- UI rendering --------------------------------------------------------
@@ -562,9 +498,10 @@
             <div class="ticker">${company.ticker}</div>
             <div class="company-name">${company.name}</div>
           </div>
-          <div style="text-align:right;">
-            <div class="live-price">N/A<span> live</span></div>
-            <div class="category-pill">${company.category}</div>
+          <div style="text-align:right;" class="live-price">
+            <div class="price-row"><div class="price-value">N/A</div><div class="price-tag">live</div></div>
+            <div class="price-meta"></div>
+            <div class="category-pill" style="margin-top:6px">${company.category}</div>
           </div>
         </div>
 
@@ -572,55 +509,20 @@
           <div class="profile-text">${company.profile}</div>
 
           <div class="metrics-row">
-            <div class="metric">
-              <span>P/E</span>
-              <span class="value">${company.pe != null ? company.pe : "N/A"}</span>
-            </div>
-            <div class="metric">
-              <span>EV/EBITDA</span>
-              <span class="value">${company.evEbitda != null ? company.evEbitda : "N/A"}</span>
-            </div>
+            <div class="metric"><span>P/E</span><span class="value">${company.pe != null ? company.pe : "N/A"}</span></div>
+            <div class="metric"><span>EV/EBITDA</span><span class="value">${company.evEbitda != null ? company.evEbitda : "N/A"}</span></div>
           </div>
 
           <div class="inputs-row">
-            <div class="input-group">
-              <label>Growth rate (annual, %)</label>
-              <input type="number" step="0.1" min="-50" max="50"
-                value="${(company.assumptions.growthRate * 100).toFixed(1)}"
-                data-field="growthRate" />
-            </div>
-            <div class="input-group">
-              <label>Discount rate (%, WACC)</label>
-              <input type="number" step="0.1" min="0" max="50"
-                value="${(company.assumptions.discountRate * 100).toFixed(1)}"
-                data-field="discountRate" />
-            </div>
-            <div class="input-group">
-              <label>Margin (net, %)</label>
-              <input type="number" step="0.1" min="-50" max="80"
-                value="${(company.assumptions.margin * 100).toFixed(1)}"
-                data-field="margin" />
-            </div>
-            <div class="input-group">
-              <label>Horizon (years)</label>
-              <input type="number" step="1" min="1" max="15"
-                value="${company.assumptions.years}"
-                data-field="years" />
-            </div>
+            <div class="input-group"><label>Growth rate (annual, %)</label><input type="number" step="0.1" min="-50" max="50" value="${(company.assumptions.growthRate * 100).toFixed(1)}" data-field="growthRate" /></div>
+            <div class="input-group"><label>Discount rate (%, WACC)</label><input type="number" step="0.1" min="0" max="50" value="${(company.assumptions.discountRate * 100).toFixed(1)}" data-field="discountRate" /></div>
+            <div class="input-group"><label>Margin (net, %)</label><input type="number" step="0.1" min="-50" max="80" value="${(company.assumptions.margin * 100).toFixed(1)}" data-field="margin" /></div>
+            <div class="input-group"><label>Horizon (years)</label><input type="number" step="1" min="1" max="15" value="${company.assumptions.years}" data-field="years" /></div>
           </div>
 
-          <div class="intrinsic-row">
-            <span>Intrinsic value</span>
-            <span class="value intrinsic-value">N/A</span>
-          </div>
+          <div class="intrinsic-row"><span>Intrinsic value</span><span class="value intrinsic-value">N/A</span></div>
 
-          <div class="gauge-row">
-            <span class="gauge-label">Signal</span>
-            <div class="gauge-bar">
-              <div class="gauge-indicator"></div>
-            </div>
-            <span class="gauge-text wait">wait</span>
-          </div>
+          <div class="gauge-row"><span class="gauge-label">Signal</span><div class="gauge-bar"><div class="gauge-indicator"></div></div><span class="gauge-text wait">wait</span></div>
         </div>
       `;
 
@@ -643,82 +545,89 @@
       return card;
     }
 
-    function updateIntrinsicAndGauge(card, company) {
-      const intrinsicEl = card.querySelector(".intrinsic-value");
-      const gaugeIndicator = card.querySelector(".gauge-indicator");
-      const gaugeText = card.querySelector(".gauge-text");
-      const price = company.livePrice;
+    function updatePriceDisplay(card, company) {
+      const priceValueEl = card.querySelector('.price-value');
+      const priceTagEl = card.querySelector('.price-tag');
+      const metaEl = card.querySelector('.price-meta');
 
-      const intrinsic = computeIntrinsicValue(price, company.assumptions);
-      if (intrinsicEl) {
-        intrinsicEl.textContent =
-          intrinsic != null ? "$" + intrinsic.toFixed(2) : "N/A";
-      }
-
-      const signal = classifySignal(price, intrinsic);
-      if (gaugeIndicator) {
-        gaugeIndicator.style.left = signal.pos + "%";
-      }
-      if (gaugeText) {
-        gaugeText.textContent = signal.label;
-        gaugeText.className = "gauge-text " + signal.label;
+      if (company.livePrice != null) {
+        priceValueEl.textContent = '$' + company.livePrice.toFixed(2);
+        priceTagEl.textContent = 'live';
+        metaEl.textContent = new Date(company.lastUpdated).toLocaleString();
+      } else if (company.lastKnownPrice != null) {
+        priceValueEl.textContent = '$' + company.lastKnownPrice.toFixed(2);
+        priceTagEl.textContent = 'last';
+        metaEl.textContent = 'as of ' + new Date(company.lastUpdated).toLocaleString();
+      } else {
+        priceValueEl.textContent = 'N/A';
+        priceTagEl.textContent = '—';
+        metaEl.textContent = '';
       }
     }
 
+    function updateIntrinsicAndGauge(card, company) {
+      const intrinsicEl = card.querySelector('.intrinsic-value');
+      const gaugeIndicator = card.querySelector('.gauge-indicator');
+      const gaugeText = card.querySelector('.gauge-text');
+
+      const priceToUse = company.livePrice != null ? company.livePrice : company.lastKnownPrice;
+      const intrinsic = computeIntrinsicValue(priceToUse, company.assumptions);
+      if (intrinsicEl) {
+        intrinsicEl.textContent = intrinsic != null ? '$' + intrinsic.toFixed(2) : 'N/A';
+      }
+
+      const signal = classifySignal(priceToUse, intrinsic);
+      if (gaugeIndicator) gaugeIndicator.style.left = signal.pos + '%';
+      if (gaugeText) { gaugeText.textContent = signal.label; gaugeText.className = 'gauge-text ' + signal.label; }
+    }
+
     function renderGrid() {
-      const grid = document.getElementById("companyGrid");
-      grid.innerHTML = "";
-      companies.forEach((c, i) => {
-        const card = createCard(c, i);
-        grid.appendChild(card);
-      });
+      const grid = document.getElementById('companyGrid');
+      grid.innerHTML = '';
+      companies.forEach((c, i) => { const card = createCard(c, i); grid.appendChild(card); updatePriceDisplay(card, c); updateIntrinsicAndGauge(card, c); });
     }
 
     // --- Add company flow -----------------------------------------------------
     function addCompanyPrompt() {
-      const ticker = prompt("Enter ticker symbol (e.g., NVDA):");
-      if (!ticker) return;
-      const name = prompt("Enter company name:");
-      const category = prompt("Enter category (e.g., GPUs / AI hardware):");
-      const profile =
-        prompt("Enter a short profile/description:") ||
-        "User‑added company; profile to be refined.";
+      const ticker = prompt('Enter ticker symbol (e.g., NVDA):'); if (!ticker) return;
+      const name = prompt('Enter company name:');
+      const category = prompt('Enter category (e.g., GPUs / AI hardware):');
+      const profile = prompt('Enter a short profile/description:') || 'User‑added company; profile to be refined.';
 
-      const newCompany = {
-        ticker: ticker.trim().toUpperCase(),
-        name: name || ticker.trim().toUpperCase(),
-        category: category || "Custom",
-        profile,
-        livePrice: null,
-        pe: null,
-        evEbitda: null,
-        assumptions: {
-          growthRate: 0.08,
-          discountRate: 0.11,
-          margin: 0.15,
-          years: 5
-        }
-      };
+      const newCompany = { ticker: ticker.trim().toUpperCase(), name: name || ticker.trim().toUpperCase(), category: category || 'Custom', profile, livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, assumptions: { growthRate: 0.08, discountRate: 0.11, margin: 0.15, years: 5 } };
       companies.push(newCompany);
       renderGrid();
       refreshAllPrices();
     }
 
     // --- Init -----------------------------------------------------------------
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      // restore last-known prices into companies
+      const lastPrices = loadLastPrices();
+      companies.forEach(c => {
+        if (lastPrices[c.ticker]) { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
+      });
+
+      // render
       renderGrid();
-      refreshAllPrices();
 
-      document
-        .getElementById("addCompanyBtn")
-        .addEventListener("click", addCompanyPrompt);
+      // wire buttons
+      document.getElementById('addCompanyBtn').addEventListener('click', addCompanyPrompt);
+      document.getElementById('refreshNowBtn').addEventListener('click', refreshAllPrices);
 
-      document
-        .getElementById("refreshNowBtn")
-        .addEventListener("click", refreshAllPrices);
+      // Theme init
+      const theme = loadTheme();
+      const body = document.body;
+      const toggle = document.getElementById('themeToggle');
+      if (theme === 'dark') { body.classList.add('dark-theme'); toggle.checked = true; }
+      else { body.classList.remove('dark-theme'); toggle.checked = false; }
+      toggle.addEventListener('change', (e) => { if (e.target.checked) { body.classList.add('dark-theme'); saveTheme('dark'); } else { body.classList.remove('dark-theme'); saveTheme('light'); } });
 
       // Auto refresh every 60 seconds
       setInterval(refreshAllPrices, 60000);
+
+      // initial fetch
+      refreshAllPrices();
     });
   </script>
 </body>
