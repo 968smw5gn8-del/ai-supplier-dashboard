@@ -6,11 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      /* Light theme (default) */
       --bg-gradient: radial-gradient(circle at top, #f8fafc 0%, #f1f5f9 55%, #eef2f7 100%);
       --card-bg: #ffffff;
-      --accent: #0ea5e9; /* sky-500 */
-      --accent-soft: #38bdf8; /* sky-400 */
+      --accent: #0ea5e9;
+      --accent-soft: #38bdf8;
       --text: #0f1720;
       --muted: #6b7280;
       --danger: #ef4444;
@@ -23,7 +22,6 @@
       --prism-gradient: conic-gradient(from 180deg at 50% 50%, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #5856d6, #ff2d55, #ff3b30);
     }
 
-    /* Dark overrides */
     body.dark-theme {
       --bg-gradient: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
       --card-bg: linear-gradient(145deg, #020617, #0b1120);
@@ -36,400 +34,117 @@
       --success: #22c55e;
       --border: rgba(255,255,255,0.04);
       --shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
-      --prism-gradient: conic-gradient(from 180deg at 50% 50%, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #5856d6, #ff2d55, #ff3b30);
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text);
-    }
-
-    .app {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px 12px 32px;
-    }
-
-    header {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    header h1 {
-      font-size: 1.4rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    header h1 span.logo-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #22c55e, var(--accent));
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
-    }
-
-    header p {
-      font-size: 0.9rem;
-      color: var(--muted);
-      max-width: 720px;
-    }
-
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-      align-items: center;
-    }
-
-    .toolbar button,
-    .toolbar select {
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.6);
-      color: var(--text);
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-
-    .toolbar button.primary {
-      background: linear-gradient(135deg, var(--accent-soft), var(--accent));
-      border: none;
-      color: #0b1120;
-      font-weight: 600;
-      box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15);
-    }
-
-    .toolbar button svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    @media (min-width: 640px) {
-      .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (min-width: 960px) {
-      .grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
-    .card {
-      position: relative;
-      border-radius: var(--radius);
-      padding: 12px;
-      background: var(--card-bg);
-      box-shadow: var(--shadow);
-      overflow: visible;
-      z-index: 0;
-      /* inner content styling */
-      padding: var(--card-padding);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* Prism border effect using a pseudo-element + mask to create a border ring */
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -1px;
-      z-index: -1;
-      border-radius: calc(var(--radius) + 2px);
-      background: var(--prism-gradient);
-      padding: 2px; /* thickness of the prism border */
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      filter: blur(8px) saturate(120%);
-      opacity: 0.85;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .ticker {
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-    }
-
-    .company-name {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .category-pill {
-      font-size: 0.7rem;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .live-price {
-      font-size: 0.95rem;
-      font-weight: 600;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-    }
-
-    .live-price .price-row {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-
-    .live-price .price-value {
-      font-size: 1rem;
-      color: var(--text);
-    }
-
-    .live-price .price-tag {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: lowercase;
-      background: transparent;
-    }
-
-    .live-price .price-meta {
-      font-size: 0.68rem;
-      color: var(--muted);
-    }
-
-    .section-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .profile-text {
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .metrics-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
-    }
-
-    .metric {
-      font-size: 0.75rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .metric span.value {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    .gauge-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .gauge-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      min-width: 52px;
-    }
-
-    .gauge-bar {
-      flex: 1;
-      height: 8px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
-      position: relative;
-      overflow: hidden;
-    }
-
-    .gauge-indicator {
-      position: absolute;
-      top: -2px;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: var(--card-bg);
-      border: 2px solid var(--text);
-      box-shadow: 0 0 8px rgba(148, 163, 184, 0.2);
-      transform: translateX(-50%);
-    }
-
-    .gauge-text {
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: var(--bg-gradient); color: var(--text); }
+    .app { max-width: 1200px; margin: 0 auto; padding: 16px 12px 32px; }
+    header { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    header h1 { font-size: 1.4rem; letter-spacing: 0.04em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    header h1 span.logo-dot { width: 10px; height: 10px; border-radius: 999px; background: linear-gradient(135deg, #22c55e, var(--accent)); box-shadow: 0 0 12px rgba(56, 189, 248, 0.9); }
+    header p { font-size: 0.9rem; color: var(--muted); max-width: 720px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+    .toolbar button, .toolbar select { border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); color: var(--text); padding: 8px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .toolbar button.primary { background: linear-gradient(135deg, var(--accent-soft), var(--accent)); border: none; color: #0b1120; font-weight: 600; box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15); }
+    .toolbar button svg { width: 14px; height: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 960px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    .card { position: relative; border-radius: var(--radius); padding: var(--card-padding); background: var(--card-bg); box-shadow: var(--shadow); overflow: visible; z-index: 0; display: flex; flex-direction: column; gap: 8px; }
+    .card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: calc(var(--radius) + 2px); background: var(--prism-gradient); padding: 2px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; filter: blur(8px) saturate(120%); opacity: 0.85; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; position: relative; z-index: 1; }
+    .card-header-left { flex: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .ticker { font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.85rem; }
+    .company-name { font-size: 0.9rem; color: var(--muted); }
+    .card-delete-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; padding: 4px 8px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: opacity 0.2s; }
+    .card-delete-btn:hover { opacity: 1; }
+    .category-pill { font-size: 0.7rem; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.25); color: var(--muted); white-space: nowrap; }
+    .live-price { font-size: 0.95rem; font-weight: 600; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .live-price .price-row { display: flex; align-items: baseline; gap: 8px; }
+    .live-price .price-value { font-size: 1rem; color: var(--text); }
+    .live-price .price-tag { font-size: 0.7rem; color: var(--muted); text-transform: lowercase; }
+    .live-price .price-meta { font-size: 0.68rem; color: var(--muted); }
+    .section-row { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
+    .profile-text { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+    .metrics-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .metric { font-size: 0.75rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+    .metric span.value { color: var(--text); font-weight: 500; }
+    .gauge-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .gauge-label { font-size: 0.75rem; color: var(--muted); min-width: 52px; }
+    .gauge-bar { flex: 1; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--danger), var(--warning), var(--success)); position: relative; overflow: hidden; }
+    .gauge-indicator { position: absolute; top: -2px; width: 12px; height: 12px; border-radius: 999px; background: var(--card-bg); border: 2px solid var(--text); box-shadow: 0 0 8px rgba(148, 163, 184, 0.2); transform: translateX(-50%); }
+    .gauge-text { font-size: 0.75rem; font-weight: 600; }
     .gauge-text.buy { color: var(--success); }
     .gauge-text.sell { color: var(--danger); }
     .gauge-text.hold { color: var(--warning); }
     .gauge-text.wait { color: var(--muted); }
-
-    .inputs-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
-      margin-top: 4px;
-    }
-
+    .inputs-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 4px; }
     .input-group { display: flex; flex-direction: column; gap: 2px; }
     .input-group label { font-size: 0.7rem; color: var(--muted); }
-    .input-group input {
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.08);
-      background: rgba(255,255,255,0.9);
-      color: var(--text);
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      width: 100%;
-    }
-
-    body.dark-theme .input-group input {
-      background: rgba(15,23,42,0.6);
-      border: 1px solid rgba(255,255,255,0.04);
-      color: var(--text);
-    }
-
-    .input-group input:focus {
-      outline: none;
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12);
-    }
-
+    .input-group input { border-radius: 999px; border: 1px solid rgba(55, 65, 81, 0.08); background: rgba(255,255,255,0.9); color: var(--text); padding: 4px 8px; font-size: 0.75rem; width: 100%; }
+    body.dark-theme .input-group input { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.04); color: var(--text); }
+    .input-group input:focus { outline: none; border-color: var(--accent-soft); box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12); }
     .intrinsic-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.78rem; }
     .intrinsic-row span.value { font-weight: 600; }
-
     .footer-note { margin-top: 18px; font-size: 0.7rem; color: var(--muted); max-width: 720px; }
     .footer-note strong { color: var(--accent); font-weight: 500; }
-
-    /* Theme toggle area */
     .theme-toggle { margin-top: 12px; display:flex; justify-content:flex-end; align-items:center; gap:8px; }
     .theme-toggle label { font-size:0.8rem; color:var(--muted); display:inline-flex; align-items:center; gap:8px; }
     .theme-toggle input[type="checkbox"] { width:18px;height:18px; }
-
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>
-        <span class="logo-dot"></span>
-        AI Supplier Valuation Grid
-      </h1>
-      <p>
-        Mobile‑first dashboard for intrinsic value modeling of AI infrastructure suppliers.
-        Live prices refresh every 60 seconds via Yahoo Finance; you can tweak assumptions per company and
-        see buy/sell/hold/wait signals update in real time.
-      </p>
+      <h1><span class="logo-dot"></span>AI Supplier Valuation Grid</h1>
+      <p>Mobile-first dashboard for intrinsic value modeling of AI infrastructure suppliers. Live prices refresh every 60 seconds via Finnhub. Your configuration saves automatically.</p>
     </header>
 
     <div class="toolbar">
-      <button class="primary" id="addCompanyBtn">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#0b1120" stroke-width="2" stroke-linecap="round" /></svg>
-        Add company
-      </button>
-      <button id="refreshNowBtn">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /><path d="M5 13a7 7 0 0 0 11 4" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /></svg>
-        Refresh prices
-      </button>
+      <button class="primary" id="addCompanyBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#0b1120" stroke-width="2" stroke-linecap="round" /></svg>Add company</button>
+      <button id="refreshNowBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /><path d="M5 13a7 7 0 0 0 11 4" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /></svg>Refresh prices</button>
       <select id="currencySelect"><option value="USD">USD</option></select>
-      <span style="font-size:0.75rem;color:var(--muted);">Live data: Yahoo Finance (60s interval)</span>
+      <span style="font-size:0.75rem;color:var(--muted);">Live data: Finnhub</span>
     </div>
 
     <div class="grid" id="companyGrid"></div>
 
-    <p class="footer-note">
-      This page is a <strong>client‑side single‑page app</strong> designed for GitHub Pages deployment.
-      All modeling is local to your browser. Live data uses public Yahoo Finance endpoints via
-      <code>fetch</code>; for production, consider adding a small proxy/API layer to handle rate limits and CORS.
-      Nothing here is investment advice—just a sandbox for thinking clearly.
-    </p>
+    <p class="footer-note">Client-side app for GitHub Pages. All modeling is local to your browser. Finnhub provides reliable prices (15-20 min delayed). Markets closed? Falls back to last price. Company list and assumptions auto-save to browser storage.</p>
 
-    <div class="theme-toggle">
-      <label>
-        <input type="checkbox" id="themeToggle" />
-        Dark mode
-      </label>
-    </div>
+    <div class="theme-toggle"><label><input type="checkbox" id="themeToggle" />Dark mode</label></div>
   </div>
 
   <script>
-    // --- Local persistence helpers -------------------------------------------
     const STORAGE_KEY = 'ai_supplier_last_prices_v1';
+    const COMPANIES_KEY = 'ai_supplier_companies_v1';
     const THEME_KEY = 'ai_supplier_theme_v1';
 
     function loadLastPrices() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; } }
     function saveLastPrices(obj) { localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
-
+    function loadCompanies() { try { return JSON.parse(localStorage.getItem(COMPANIES_KEY) || 'null'); } catch (e) { return null; } }
+    function saveCompanies() { localStorage.setItem(COMPANIES_KEY, JSON.stringify(companies)); }
     function loadTheme() { return localStorage.getItem(THEME_KEY) || 'light'; }
     function saveTheme(theme) { localStorage.setItem(THEME_KEY, theme); }
 
-    // --- Core data model ------------------------------------------------------
-    const companies = [
-      { ticker: "IFX.DE", name: "Infineon Technologies", category: "Power ICs / Memory", profile: "Deep in the AI power‑delivery stack; critical for GPU/CPU boards but not yet repriced like leading memory names.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 18, evEbitda: 10, assumptions: { growthRate: 0.08, discountRate: 0.11, margin: 0.18, years: 5 } },
-      { ticker: "STM", name: "STMicroelectronics", category: "Embedded Memory / Power", profile: "Essential embedded memory and power components for AI servers; trades more like a cyclical than an AI beneficiary.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 16, evEbitda: 9, assumptions: { growthRate: 0.07, discountRate: 0.11, margin: 0.17, years: 5 } },
-      { ticker: "2408.TW", name: "Nanya Technology", category: "DRAM", profile: "Mid‑tier DRAM supplier; high torque to memory cycles. AI demand can tighten DRAM supply and lift pricing.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: 8, assumptions: { growthRate: 0.10, discountRate: 0.13, margin: 0.15, years: 5 } },
-      { ticker: "DELL", name: "Dell Technologies", category: "AI Servers", profile: "Major AI server vendor with large hyperscaler exposure; forecasts substantial AI server revenue but still trades at modest multiples.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 13, evEbitda: 8, assumptions: { growthRate: 0.09, discountRate: 0.11, margin: 0.12, years: 5 } },
-      { ticker: "WDC", name: "Western Digital", category: "NAND / Storage", profile: "Storage demand rises with AI clusters; structurally levered to data growth but has lagged some memory peers.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: 9, assumptions: { growthRate: 0.09, discountRate: 0.12, margin: 0.14, years: 5 } },
-      { ticker: "ORCL", name: "Oracle", category: "AI Cloud Infrastructure", profile: "Cloud infrastructure provider with large AI‑related capex; recent pullback after spending announcements creates asymmetry.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: 22, evEbitda: 12, assumptions: { growthRate: 0.07, discountRate: 0.10, margin: 0.25, years: 5 } }
+    const defaultCompanies = [
+      { ticker: "IFX", name: "Infineon Technologies", category: "Power ICs / Memory", profile: "Deep in the AI power-delivery stack; critical for GPU/CPU boards.", pe: 12.5, evEbitda: 8.2, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.12, discountRate: 0.09, margin: 0.18, years: 5 } },
+      { ticker: "STM", name: "STMicroelectronics", category: "Embedded Memory / Power", profile: "Essential embedded memory and power components for AI servers.", pe: 11.8, evEbitda: 7.9, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.10, discountRate: 0.09, margin: 0.20, years: 5 } },
+      { ticker: "DELL", name: "Dell Technologies", category: "AI Servers", profile: "Major AI server vendor with large hyperscaler exposure.", pe: 14.2, evEbitda: 6.5, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.15, discountRate: 0.10, margin: 0.08, years: 5 } },
+      { ticker: "WDC", name: "Western Digital", category: "NAND / Storage", profile: "Storage demand rises with AI clusters.", pe: 9.3, evEbitda: 5.2, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.11, discountRate: 0.10, margin: 0.15, years: 5 } },
+      { ticker: "ORCL", name: "Oracle", category: "AI Cloud Infrastructure", profile: "Cloud infrastructure provider with large AI-related capex.", pe: 18.5, evEbitda: 9.8, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.13, discountRate: 0.08, margin: 0.30, years: 5 } },
+      { ticker: "QCOM", name: "Qualcomm", category: "Mobile / Edge AI", profile: "Edge AI processors for mobile and IoT.", pe: 15.1, evEbitda: 7.4, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.12, discountRate: 0.09, margin: 0.27, years: 5 } },
     ];
 
-    // --- Yahoo Finance fetch (client‑side) -----------------------------------
+    let companies = [];
+
     async function fetchLivePrice(ticker) {
-      const url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + encodeURIComponent(ticker);
+      const url = "https://finnhub.io/api/v1/quote?symbol=" + encodeURIComponent(ticker);
       try {
         const res = await fetch(url);
         if (!res.ok) throw new Error("Network error");
         const data = await res.json();
-        const quote = data?.quoteResponse?.result?.[0];
-        if (!quote) return null;
-        return quote.regularMarketPrice ?? null;
+        if (data.c !== undefined && data.c > 0) return data.c;
+        return null;
       } catch (err) {
         console.warn("Price fetch failed for", ticker, err);
         return null;
@@ -451,14 +166,12 @@
           lastPrices[c.ticker] = { price: price, ts: c.lastUpdated };
           saveLastPrices(lastPrices);
         } else {
-          c.livePrice = null; // keep lastKnownPrice if present
-          // attempt to restore from stored lastPrices
+          c.livePrice = null;
           if (lastPrices[c.ticker]) {
             c.lastKnownPrice = lastPrices[c.ticker].price;
             c.lastUpdated = lastPrices[c.ticker].ts;
           }
         }
-
         const card = cards[i];
         if (!card) continue;
         updatePriceDisplay(card, c);
@@ -466,27 +179,23 @@
       }
     }
 
-    // --- Intrinsic value modeling --------------------------------------------
     function computeIntrinsicValue(currentPrice, assumptions) {
       if (!currentPrice || currentPrice <= 0) return null;
       const { growthRate, discountRate, years } = assumptions;
       const growthFactor = Math.pow(1 + (growthRate || 0), years || 5);
       const discountFactor = Math.pow(1 + (discountRate || 0.1), years || 5);
-      const intrinsic = currentPrice * (growthFactor / discountFactor);
-      return intrinsic;
+      return currentPrice * (growthFactor / discountFactor);
     }
 
     function classifySignal(currentPrice, intrinsic) {
       if (!currentPrice || !intrinsic) return { label: "wait", pos: 50 };
       const diff = (intrinsic - currentPrice) / currentPrice;
-
       if (diff >= 0.25) return { label: "buy", pos: 80 };
       else if (diff >= 0.05) return { label: "hold", pos: 60 };
       else if (diff <= -0.15) return { label: "sell", pos: 20 };
       else return { label: "wait", pos: 45 };
     }
 
-    // --- UI rendering --------------------------------------------------------
     function createCard(company, index) {
       const card = document.createElement("div");
       card.className = "card";
@@ -494,9 +203,9 @@
 
       card.innerHTML = `
         <div class="card-header">
-          <div>
-            <div class="ticker">${company.ticker}</div>
-            <div class="company-name">${company.name}</div>
+          <div class="card-header-left">
+            <div><div class="ticker">${company.ticker}</div><div class="company-name">${company.name}</div></div>
+            <button class="card-delete-btn" title="Remove this company">×</button>
           </div>
           <div style="text-align:right;" class="live-price">
             <div class="price-row"><div class="price-value">N/A</div><div class="price-tag">live</div></div>
@@ -504,29 +213,32 @@
             <div class="category-pill" style="margin-top:6px">${company.category}</div>
           </div>
         </div>
-
         <div class="section-row">
           <div class="profile-text">${company.profile}</div>
-
           <div class="metrics-row">
             <div class="metric"><span>P/E</span><span class="value">${company.pe != null ? company.pe : "N/A"}</span></div>
             <div class="metric"><span>EV/EBITDA</span><span class="value">${company.evEbitda != null ? company.evEbitda : "N/A"}</span></div>
           </div>
-
           <div class="inputs-row">
             <div class="input-group"><label>Growth rate (annual, %)</label><input type="number" step="0.1" min="-50" max="50" value="${(company.assumptions.growthRate * 100).toFixed(1)}" data-field="growthRate" /></div>
             <div class="input-group"><label>Discount rate (%, WACC)</label><input type="number" step="0.1" min="0" max="50" value="${(company.assumptions.discountRate * 100).toFixed(1)}" data-field="discountRate" /></div>
             <div class="input-group"><label>Margin (net, %)</label><input type="number" step="0.1" min="-50" max="80" value="${(company.assumptions.margin * 100).toFixed(1)}" data-field="margin" /></div>
             <div class="input-group"><label>Horizon (years)</label><input type="number" step="1" min="1" max="15" value="${company.assumptions.years}" data-field="years" /></div>
           </div>
-
           <div class="intrinsic-row"><span>Intrinsic value</span><span class="value intrinsic-value">N/A</span></div>
-
           <div class="gauge-row"><span class="gauge-label">Signal</span><div class="gauge-bar"><div class="gauge-indicator"></div></div><span class="gauge-text wait">wait</span></div>
         </div>
       `;
 
-      // Wire up inputs
+      const deleteBtn = card.querySelector('.card-delete-btn');
+      deleteBtn.addEventListener('click', () => {
+        if (confirm(`Remove ${company.ticker} from your dashboard?`)) {
+          companies.splice(index, 1);
+          saveCompanies();
+          renderGrid();
+        }
+      });
+
       const inputs = card.querySelectorAll(".input-group input");
       inputs.forEach((input) => {
         input.addEventListener("input", () => {
@@ -538,6 +250,7 @@
           } else if (field === "years") {
             company.assumptions[field] = Math.max(1, Math.round(val));
           }
+          saveCompanies();
           updateIntrinsicAndGauge(card, company);
         });
       });
@@ -587,35 +300,36 @@
       companies.forEach((c, i) => { const card = createCard(c, i); grid.appendChild(card); updatePriceDisplay(card, c); updateIntrinsicAndGauge(card, c); });
     }
 
-    // --- Add company flow -----------------------------------------------------
     function addCompanyPrompt() {
       const ticker = prompt('Enter ticker symbol (e.g., NVDA):'); if (!ticker) return;
       const name = prompt('Enter company name:');
       const category = prompt('Enter category (e.g., GPUs / AI hardware):');
-      const profile = prompt('Enter a short profile/description:') || 'User‑added company; profile to be refined.';
+      const profile = prompt('Enter a short profile/description:') || 'User-added company; profile to be refined.';
 
-      const newCompany = { ticker: ticker.trim().toUpperCase(), name: name || ticker.trim().toUpperCase(), category: category || 'Custom', profile, livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, assumptions: { growthRate: 0.08, discountRate: 0.11, margin: 0.15, years: 5 } };
+      const newCompany = { ticker: ticker.trim().toUpperCase(), name: name || ticker.trim().toUpperCase(), category: category || 'Custom', profile, pe: null, evEbitda: null, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.12, discountRate: 0.09, margin: 0.15, years: 5 } };
       companies.push(newCompany);
+      saveCompanies();
       renderGrid();
       refreshAllPrices();
     }
 
-    // --- Init -----------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
-      // restore last-known prices into companies
+      const saved = loadCompanies();
+      if (saved && saved.length > 0) {
+        companies = saved;
+      } else {
+        companies = JSON.parse(JSON.stringify(defaultCompanies));
+      }
+
       const lastPrices = loadLastPrices();
       companies.forEach(c => {
         if (lastPrices[c.ticker]) { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
       });
 
-      // render
       renderGrid();
-
-      // wire buttons
       document.getElementById('addCompanyBtn').addEventListener('click', addCompanyPrompt);
       document.getElementById('refreshNowBtn').addEventListener('click', refreshAllPrices);
 
-      // Theme init
       const theme = loadTheme();
       const body = document.body;
       const toggle = document.getElementById('themeToggle');
@@ -623,10 +337,7 @@
       else { body.classList.remove('dark-theme'); toggle.checked = false; }
       toggle.addEventListener('change', (e) => { if (e.target.checked) { body.classList.add('dark-theme'); saveTheme('dark'); } else { body.classList.remove('dark-theme'); saveTheme('light'); } });
 
-      // Auto refresh every 60 seconds
       setInterval(refreshAllPrices, 60000);
-
-      // initial fetch
       refreshAllPrices();
     });
   </script>
