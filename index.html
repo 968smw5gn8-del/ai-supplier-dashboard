@@ -21,7 +21,6 @@
       --card-padding: 12px 12px 14px;
       --prism-gradient: conic-gradient(from 180deg at 50% 50%, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #5856d6, #ff2d55, #ff3b30);
     }
-
     body.dark-theme {
       --bg-gradient: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
       --card-bg: linear-gradient(145deg, #020617, #0b1120);
@@ -29,13 +28,9 @@
       --accent-soft: #0ea5e9;
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #22c55e;
       --border: rgba(255,255,255,0.04);
       --shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
     }
-
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: var(--bg-gradient); color: var(--text); }
     .app { max-width: 1200px; margin: 0 auto; padding: 16px 12px 32px; }
@@ -44,19 +39,47 @@
     header h1 span.logo-dot { width: 10px; height: 10px; border-radius: 999px; background: linear-gradient(135deg, #22c55e, var(--accent)); box-shadow: 0 0 12px rgba(56, 189, 248, 0.9); }
     header p { font-size: 0.9rem; color: var(--muted); max-width: 720px; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
-    .toolbar button, .toolbar select { border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); color: var(--text); padding: 8px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .toolbar button, .toolbar select { border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); color: var(--text); padding: 8px 14px; font-size: 0.85rem; cursor: pointer; }
     .toolbar button.primary { background: linear-gradient(135deg, var(--accent-soft), var(--accent)); border: none; color: #0b1120; font-weight: 600; box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15); }
+    .portfolio-bar { position: sticky; top: 8px; z-index: 20; background: var(--card-bg); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
+    .portfolio-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .portfolio-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+    .weight-toggle { display: flex; gap: 4px; align-items: center; font-size: 0.7rem; }
+    .weight-toggle button { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.7rem; cursor: pointer; }
+    .weight-toggle button.active { background: linear-gradient(135deg, var(--accent-soft), var(--accent)); color: #0b1120; border: none; font-weight: 600; }
+    .portfolio-metrics { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    @media (min-width: 640px) { .portfolio-metrics { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+    @media (min-width: 960px) { .portfolio-metrics { grid-template-columns: repeat(5, minmax(0,1fr)); } }
+    .pm-cell { display: flex; flex-direction: column; gap: 2px; }
+    .pm-cell .pm-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .pm-cell .pm-value { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .pm-cell .pm-sub { font-size: 0.65rem; color: var(--muted); }
+    .pm-value.pos { color: var(--success); }
+    .pm-value.neg { color: var(--danger); }
+    .signal-breakdown { display: flex; gap: 6px; flex-wrap: wrap; }
+    .signal-chip { font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+    .signal-chip.buy  { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .signal-chip.hold { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .signal-chip.sell { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .signal-chip.wait { background: rgba(148, 163, 184, 0.15); color: var(--muted); }
+    .exclusion-note { font-size: 0.65rem; color: var(--warning); font-style: italic; }
+    .settings-panel { background: var(--card-bg); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; box-shadow: var(--shadow); display: none; }
+    .settings-panel.open { display: block; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (min-width: 960px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     .card { position: relative; border-radius: var(--radius); padding: var(--card-padding); background: var(--card-bg); box-shadow: var(--shadow); overflow: visible; z-index: 0; display: flex; flex-direction: column; gap: 8px; }
     .card::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: calc(var(--radius) + 2px); background: var(--prism-gradient); padding: 2px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; filter: blur(8px) saturate(120%); opacity: 0.85; }
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; position: relative; z-index: 1; }
-    .card-header-left { flex: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .card-header-actions { display: flex; align-items: center; gap: 4px; }
+    .card-header-info { flex: 1; }
     .ticker { font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.85rem; }
     .company-name { font-size: 0.9rem; color: var(--muted); }
-    .card-delete-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; padding: 4px 8px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: opacity 0.2s; }
-    .card-delete-btn:hover { opacity: 1; }
+    .card-icon-btn { background: transparent; border: none; cursor: pointer; padding: 4px 6px; font-size: 1rem; opacity: 0.5; transition: opacity 0.15s; color: var(--text); border-radius: 6px; }
+    .card-icon-btn:hover { opacity: 1; background: rgba(148, 163, 184, 0.1); }
+    .card-icon-btn.delete { color: var(--danger); font-size: 1.15rem; opacity: 0.55; }
+    .card-icon-btn.delete:hover { opacity: 1; background: rgba(239, 68, 68, 0.1); }
     .category-pill { font-size: 0.7rem; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.25); color: var(--muted); white-space: nowrap; }
     .live-price { font-size: 0.95rem; font-weight: 600; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
     .live-price .price-row { display: flex; align-items: baseline; gap: 8px; }
@@ -68,10 +91,22 @@
     .metrics-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
     .metric { font-size: 0.75rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
     .metric span.value { color: var(--text); font-weight: 500; }
+    .position-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(148, 163, 184, 0.08); border-radius: 8px; font-size: 0.72rem; }
+    .position-row label { color: var(--muted); }
+    .position-row input { border-radius: 6px; border: 1px solid rgba(55, 65, 81, 0.08); background: rgba(255,255,255,0.9); color: var(--text); padding: 3px 6px; font-size: 0.75rem; width: 70px; }
+    body.dark-theme .position-row input { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.04); color: var(--text); }
+    .position-row .position-value { margin-left: auto; color: var(--text); font-weight: 600; }
+    .method-signals { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px 0; border-top: 1px dashed rgba(148, 163, 184, 0.2); border-bottom: 1px dashed rgba(148, 163, 184, 0.2); }
+    .method-chip { font-size: 0.62rem; padding: 2px 6px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
+    .method-chip .m-label { color: var(--muted); font-weight: 500; }
+    .method-chip.buy  { background: rgba(34, 197, 94, 0.12); color: var(--success); }
+    .method-chip.hold { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
+    .method-chip.sell { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+    .method-chip.wait { background: rgba(148, 163, 184, 0.12); color: var(--muted); }
     .gauge-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-    .gauge-label { font-size: 0.75rem; color: var(--muted); min-width: 52px; }
+    .gauge-label { font-size: 0.75rem; color: var(--muted); min-width: 62px; }
     .gauge-bar { flex: 1; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--danger), var(--warning), var(--success)); position: relative; overflow: hidden; }
-    .gauge-indicator { position: absolute; top: -2px; width: 12px; height: 12px; border-radius: 999px; background: var(--card-bg); border: 2px solid var(--text); box-shadow: 0 0 8px rgba(148, 163, 184, 0.2); transform: translateX(-50%); }
+    .gauge-indicator { position: absolute; top: -2px; width: 12px; height: 12px; border-radius: 999px; background: var(--card-bg); border: 2px solid var(--text); transform: translateX(-50%); }
     .gauge-text { font-size: 0.75rem; font-weight: 600; }
     .gauge-text.buy { color: var(--success); }
     .gauge-text.sell { color: var(--danger); }
@@ -79,10 +114,13 @@
     .gauge-text.wait { color: var(--muted); }
     .inputs-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 4px; }
     .input-group { display: flex; flex-direction: column; gap: 2px; }
-    .input-group label { font-size: 0.7rem; color: var(--muted); }
+    .input-group label { font-size: 0.7rem; color: var(--muted); display:flex; justify-content:space-between; align-items:center; }
+    .input-group label .auto-badge { font-size: 0.6rem; padding: 1px 5px; border-radius: 6px; background: rgba(34, 197, 94, 0.15); color: var(--success); font-weight: 600; }
+    .input-group label .auto-badge.override { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
     .input-group input { border-radius: 999px; border: 1px solid rgba(55, 65, 81, 0.08); background: rgba(255,255,255,0.9); color: var(--text); padding: 4px 8px; font-size: 0.75rem; width: 100%; }
     body.dark-theme .input-group input { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.04); color: var(--text); }
     .input-group input:focus { outline: none; border-color: var(--accent-soft); box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12); }
+    .reset-btn { font-size: 0.65rem; color: var(--accent); background: transparent; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
     .intrinsic-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.78rem; }
     .intrinsic-row span.value { font-weight: 600; }
     .footer-note { margin-top: 18px; font-size: 0.7rem; color: var(--muted); max-width: 720px; }
@@ -90,304 +128,609 @@
     .theme-toggle { margin-top: 12px; display:flex; justify-content:flex-end; align-items:center; gap:8px; }
     .theme-toggle label { font-size:0.8rem; color:var(--muted); display:inline-flex; align-items:center; gap:8px; }
     .theme-toggle input[type="checkbox"] { width:18px;height:18px; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; padding: 12px; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: var(--card-bg); border-radius: var(--radius); padding: 20px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
+    .modal h3 { margin: 0 0 12px; font-size: 1rem; }
+    .modal .modal-body { display: flex; flex-direction: column; gap: 10px; }
+    .modal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .modal .modal-actions button { border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); color: var(--text); padding: 6px 14px; font-size: 0.85rem; cursor: pointer; }
+    .modal .modal-actions button.primary { background: linear-gradient(135deg, var(--accent-soft), var(--accent)); color: #0b1120; font-weight: 600; border: none; }
+    .modal .preview { font-size: 0.75rem; color: var(--muted); padding: 8px; border-radius: 8px; background: rgba(148, 163, 184, 0.08); }
+    .history-chart { width: 100%; height: 200px; background: rgba(148, 163, 184, 0.05); border-radius: 8px; padding: 8px; }
+    .history-legend { display: flex; gap: 12px; font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
+    .history-legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
       <h1><span class="logo-dot"></span>AI Supplier Valuation Grid</h1>
-      <p>Mobile-first DCF dashboard for AI infrastructure suppliers. Real FCF from 10-K filings, plus live prices, P/E, and EV/EBITDA via Finnhub. Auto-saves.</p>
+      <p>Multi-method valuation: DCF + PEG + relative + reverse DCF. Composite signal weights each method by growth profile.</p>
     </header>
 
     <div class="toolbar">
-      <button class="primary" id="addCompanyBtn">+ Add company</button>
-      <button id="refreshNowBtn">↻ Refresh</button>
-      <button id="setApiKeyBtn">🔑 Set API key</button>
-      <select id="currencySelect"><option value="USD">USD</option></select>
-      <span id="statusLine" style="font-size:0.75rem;color:var(--muted);">Live data: Finnhub</span>
+      <button class="primary" id="addCompanyBtn">+ Add ticker</button>
+      <button id="refreshNowBtn">&#8635; Refresh</button>
+      <button id="settingsBtn">&#9881; Macro</button>
+      <button id="setApiKeyBtn">&#128273; API key</button>
+      <button id="exportCsvBtn">&#128229; Export CSV</button>
+      <span id="statusLine" style="font-size:0.75rem;color:var(--muted);">Live: Finnhub</span>
+    </div>
+
+    <div class="portfolio-bar" id="portfolioBar">
+      <div class="portfolio-header">
+        <span class="portfolio-title">Portfolio summary</span>
+        <div class="weight-toggle" id="weightToggle">
+          <button data-mode="equal" class="active">Equal-weight</button>
+          <button data-mode="position">Position-weighted</button>
+        </div>
+      </div>
+      <div class="portfolio-metrics" id="portfolioMetrics"></div>
+      <div class="signal-breakdown" id="signalBreakdown"></div>
+      <div class="exclusion-note" id="exclusionNote"></div>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-grid">
+        <div class="input-group"><label>Risk-free rate (%)</label><input type="number" step="0.05" min="0" max="15" id="rfInput" /></div>
+        <div class="input-group"><label>Equity risk premium (%)</label><input type="number" step="0.1" min="0" max="15" id="erpInput" /></div>
+        <div class="input-group"><label>Cost of debt (%)</label><input type="number" step="0.1" min="0" max="20" id="rdInput" /></div>
+        <div class="input-group"><label>Effective tax rate (%)</label><input type="number" step="0.5" min="0" max="50" id="taxInput" /></div>
+        <div class="input-group"><label>Terminal growth (%)</label><input type="number" step="0.1" min="0" max="6" id="tgInput" /></div>
+        <div class="input-group"><label>Horizon (years)</label><input type="number" step="1" min="1" max="15" id="yearsInput" /></div>
+        <div class="input-group"><label>Semis sector P/E</label><input type="number" step="0.5" min="5" max="60" id="semisPeInput" /></div>
+        <div class="input-group"><label>Software sector P/E</label><input type="number" step="0.5" min="5" max="60" id="softwarePeInput" /></div>
+        <div class="input-group"><label>Hardware sector P/E</label><input type="number" step="0.5" min="5" max="60" id="hardwarePeInput" /></div>
+      </div>
+      <p style="font-size:0.7rem;color:var(--muted);margin-top:8px;">Sector P/E medians drive the relative-valuation signal. Update as market conditions shift.</p>
     </div>
 
     <div class="grid" id="companyGrid"></div>
 
     <p class="footer-note">
-      <strong>Real DCF</strong>: FCF/share pulled from reported 10-K cash flow statements (Cash from Ops − CapEx ÷ diluted shares).
-      Financials cached 24h; prices &amp; multiples refresh every 60s. If a filing can't be parsed, falls back to P/E-based estimate (flagged with *).
+      <strong>Composite signal:</strong> blends DCF + PEG (P/E &divide; growth) + relative (vs. sector median) + reverse DCF. Weights auto-adjust for growth profile &mdash; high-growth stocks get more weight on PEG/relative to avoid DCF's growth bias.
     </p>
 
     <div class="theme-toggle"><label><input type="checkbox" id="themeToggle" />Dark mode</label></div>
   </div>
 
+  <div class="modal-backdrop" id="addModal">
+    <div class="modal">
+      <h3>Add ticker</h3>
+      <div class="modal-body">
+        <div class="input-group"><label>Ticker symbol</label><input type="text" id="newTickerInput" placeholder="e.g. NVDA" style="text-transform:uppercase;" /></div>
+        <button id="lookupBtn" style="border-radius:999px;border:none;background:linear-gradient(135deg,var(--accent-soft),var(--accent));color:#0b1120;font-weight:600;padding:8px 14px;cursor:pointer;">Look up</button>
+        <div class="preview" id="lookupPreview">Enter a ticker and click "Look up" to autofill.</div>
+        <div class="input-group"><label>Category</label><input type="text" id="newCategoryInput" placeholder="e.g. GPUs / AI hardware" /></div>
+        <div class="input-group"><label>Profile note (optional)</label><input type="text" id="newProfileInput" placeholder="Short description" /></div>
+        <div class="input-group"><label>Shares owned (optional)</label><input type="number" id="newSharesInput" placeholder="0" min="0" step="1" /></div>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelAddBtn">Cancel</button>
+        <button id="confirmAddBtn" class="primary" disabled>Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="historyModal">
+    <div class="modal">
+      <h3 id="historyTitle">History</h3>
+      <div class="modal-body">
+        <canvas class="history-chart" id="historyChart" width="480" height="200"></canvas>
+        <div class="history-legend">
+          <span><span class="swatch" style="background:#0ea5e9;"></span>Price</span>
+          <span><span class="swatch" style="background:#22c55e;"></span>Intrinsic value</span>
+        </div>
+        <div id="historyStats" style="font-size:0.75rem;color:var(--muted);"></div>
+      </div>
+      <div class="modal-actions">
+        <button id="closeHistoryBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // ============ Storage keys ============
     const STORAGE_KEY   = 'ai_supplier_last_prices_v2';
-    const METRICS_KEY   = 'ai_supplier_last_metrics_v2';
+    const METRICS_KEY   = 'ai_supplier_last_metrics_v3';
     const FINANCIALS_KEY= 'ai_supplier_last_financials_v1';
-    const COMPANIES_KEY = 'ai_supplier_companies_v2';
+    const PROFILES_KEY  = 'ai_supplier_last_profiles_v1';
+    const COMPANIES_KEY = 'ai_supplier_companies_v5';
+    const MACRO_KEY     = 'ai_supplier_macro_v2';
+    const WEIGHT_MODE_KEY = 'ai_supplier_weight_mode_v1';
+    const HISTORY_KEY   = 'ai_supplier_history_v1';
     const THEME_KEY     = 'ai_supplier_theme_v1';
     const APIKEY_KEY    = 'ai_supplier_finnhub_key_v1';
     const FIN_TTL_MS    = 24 * 60 * 60 * 1000;
+    const PROFILE_TTL_MS= 7 * 24 * 60 * 60 * 1000;
+    const HISTORY_MAX_DAYS = 180;
 
     const load = (k, fb) => { try { return JSON.parse(localStorage.getItem(k) || fb); } catch { return JSON.parse(fb); } };
     const save = (k, v)  => localStorage.setItem(k, JSON.stringify(v));
+    const loadLastPrices=()=>load(STORAGE_KEY,'{}'); const saveLastPrices=o=>save(STORAGE_KEY,o);
+    const loadLastMetrics=()=>load(METRICS_KEY,'{}'); const saveLastMetrics=o=>save(METRICS_KEY,o);
+    const loadLastFinancials=()=>load(FINANCIALS_KEY,'{}'); const saveLastFinancials=o=>save(FINANCIALS_KEY,o);
+    const loadLastProfiles=()=>load(PROFILES_KEY,'{}'); const saveLastProfiles=o=>save(PROFILES_KEY,o);
+    const loadCompanies=()=>load(COMPANIES_KEY,'null'); const saveCompanies=()=>save(COMPANIES_KEY,companies);
+    const loadMacro=()=>load(MACRO_KEY,JSON.stringify(DEFAULT_MACRO)); const saveMacro=()=>save(MACRO_KEY,macro);
+    const loadWeightMode=()=>localStorage.getItem(WEIGHT_MODE_KEY)||'equal'; const saveWeightMode=m=>localStorage.setItem(WEIGHT_MODE_KEY,m);
+    const loadHistory=()=>load(HISTORY_KEY,'{}'); const saveHistory=h=>save(HISTORY_KEY,h);
+    const loadTheme=()=>localStorage.getItem(THEME_KEY)||'light'; const saveTheme=t=>localStorage.setItem(THEME_KEY,t);
+    const loadApiKey=()=>localStorage.getItem(APIKEY_KEY)||''; const saveApiKey=k=>localStorage.setItem(APIKEY_KEY,k);
 
-    const loadLastPrices     = () => load(STORAGE_KEY, '{}');
-    const saveLastPrices     = o  => save(STORAGE_KEY, o);
-    const loadLastMetrics    = () => load(METRICS_KEY, '{}');
-    const saveLastMetrics    = o  => save(METRICS_KEY, o);
-    const loadLastFinancials = () => load(FINANCIALS_KEY, '{}');
-    const saveLastFinancials = o  => save(FINANCIALS_KEY, o);
-    const loadCompanies      = () => load(COMPANIES_KEY, 'null');
-    const saveCompanies      = () => save(COMPANIES_KEY, companies);
-    const loadTheme          = () => localStorage.getItem(THEME_KEY) || 'light';
-    const saveTheme          = t  => localStorage.setItem(THEME_KEY, t);
-    const loadApiKey         = () => localStorage.getItem(APIKEY_KEY) || '';
-    const saveApiKey         = k  => localStorage.setItem(APIKEY_KEY, k);
+    const DEFAULT_MACRO = {
+      riskFreeRate: 0.045, equityRiskPremium: 0.055, costOfDebt: 0.055,
+      taxRate: 0.21, terminalGrowth: 0.025, years: 5,
+      sectorPE: { semis: 22, software: 28, hardware: 18, cloud: 30, default: 20 },
+    };
+    let macro = JSON.parse(JSON.stringify(DEFAULT_MACRO));
+    let weightMode = 'equal';
 
     const defaultCompanies = [
-      { ticker: "TXN",  name: "Texas Instruments",  category: "Analog / Power Semis",    profile: "Analog & embedded processing leader; broad AI-adjacent power and signal chain exposure.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.08, discountRate: 0.09, fcfMargin: 0.28, terminalGrowth: 0.025, years: 5 } },
-      { ticker: "STM",  name: "STMicroelectronics", category: "Embedded Memory / Power", profile: "Essential embedded memory and power components for AI servers.",                              livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.10, discountRate: 0.09, fcfMargin: 0.12, terminalGrowth: 0.025, years: 5 } },
-      { ticker: "DELL", name: "Dell Technologies",  category: "AI Servers",              profile: "Major AI server vendor with large hyperscaler exposure.",                                       livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.15, discountRate: 0.10, fcfMargin: 0.05, terminalGrowth: 0.025, years: 5 } },
-      { ticker: "WDC",  name: "Western Digital",    category: "NAND / Storage",          profile: "Storage demand rises with AI clusters.",                                                        livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.11, discountRate: 0.10, fcfMargin: 0.08, terminalGrowth: 0.025, years: 5 } },
-      { ticker: "ORCL", name: "Oracle",             category: "AI Cloud Infrastructure", profile: "Cloud infrastructure provider with large AI-related capex.",                                    livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.13, discountRate: 0.08, fcfMargin: 0.20, terminalGrowth: 0.025, years: 5 } },
-      { ticker: "QCOM", name: "Qualcomm",           category: "Mobile / Edge AI",        profile: "Edge AI processors for mobile and IoT.",                                                        livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.12, discountRate: 0.09, fcfMargin: 0.22, terminalGrowth: 0.025, years: 5 } },
-    ];
+      { ticker: "TXN",  category: "Analog / Power Semis" },
+      { ticker: "STM",  category: "Embedded Memory / Power" },
+      { ticker: "DELL", category: "AI Servers" },
+      { ticker: "WDC",  category: "NAND / Storage" },
+      { ticker: "ORCL", category: "AI Cloud Infrastructure" },
+      { ticker: "QCOM", category: "Mobile / Edge AI" },
+    ].map(seed => ({
+      ticker: seed.ticker, name: seed.ticker, category: seed.category, profile: '', industry: '',
+      livePrice: null, lastKnownPrice: null, lastUpdated: null,
+      pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+      beta: null, debtToEquity: null,
+      revenueGrowthTTM: null, epsGrowth3Y: null, epsGrowth5Y: null,
+      revenue: null, fcf: null, fcfMargin: null,
+      shares: 0,
+      auto: { growthRate: null, discountRate: null, fcfMargin: null },
+      overrides: { growthRate: null, discountRate: null, fcfMargin: null, terminalGrowth: null, years: null },
+    }));
 
     let companies = [];
     let apiKey = '';
 
     function setStatus(msg, isError = false) {
       const el = document.getElementById('statusLine');
-      el.textContent = msg;
-      el.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+      el.textContent = msg; el.style.color = isError ? 'var(--danger)' : 'var(--muted)';
     }
 
-    async function fetchQuote(ticker) {
-      const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${encodeURIComponent(apiKey)}`);
-      if (!res.ok) throw new Error(`quote ${res.status}`);
-      const d = await res.json();
-      return (typeof d.c === 'number' && d.c > 0) ? d.c : null;
-    }
-
-    async function fetchMetrics(ticker) {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${encodeURIComponent(ticker)}&metric=all&token=${encodeURIComponent(apiKey)}`);
-      if (!res.ok) throw new Error(`metric ${res.status}`);
-      const d = await res.json();
-      const m = d.metric || {};
-      const pe        = m.peBasicExclExtraTTM ?? m.peTTM ?? m.peNormalizedAnnual ?? null;
-      const evEbitda  = m['enterpriseValueEbitdaTTM'] ?? m.evEbitdaTTM ?? m.currentEv_ebitdaTTM ?? null;
-      const sharesOut = m.sharesOutstanding ?? m.shareOutstanding ?? null;
+    // ============ Finnhub ============
+    async function fetchQuote(t) { const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(t)}&token=${encodeURIComponent(apiKey)}`); if(!r.ok)throw new Error(`quote ${r.status}`); const d=await r.json(); return (typeof d.c==='number'&&d.c>0)?d.c:null; }
+    async function fetchProfile(t) { const r=await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${encodeURIComponent(t)}&token=${encodeURIComponent(apiKey)}`); if(!r.ok)throw new Error(`profile ${r.status}`); return await r.json(); }
+    async function fetchMetrics(t) {
+      const r=await fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${encodeURIComponent(t)}&metric=all&token=${encodeURIComponent(apiKey)}`);
+      if(!r.ok)throw new Error(`metric ${r.status}`);
+      const d=await r.json(); const m=d.metric||{}; const num=v=>(typeof v==='number'&&isFinite(v))?v:null;
       return {
-        pe:        (typeof pe === 'number' && isFinite(pe)) ? pe : null,
-        evEbitda:  (typeof evEbitda === 'number' && isFinite(evEbitda)) ? evEbitda : null,
-        sharesOut: (typeof sharesOut === 'number' && isFinite(sharesOut) && sharesOut > 0) ? sharesOut : null,
+        pe: num(m.peBasicExclExtraTTM ?? m.peTTM ?? m.peNormalizedAnnual),
+        evEbitda: num(m['enterpriseValueEbitdaTTM'] ?? m.evEbitdaTTM ?? m.currentEv_ebitdaTTM),
+        sharesOut: num(m.sharesOutstanding ?? m.shareOutstanding),
+        beta: num(m.beta),
+        debtToEquity: num(m['totalDebt/totalEquityAnnual'] ?? m['longTermDebt/equityAnnual'] ?? m.totalDebtToEquityAnnual),
+        revenueGrowthTTM: num(m.revenueGrowthTTMYoy),
+        revenueGrowth5Y: num(m.revenueGrowth5Y),
+        epsGrowth3Y: num(m.epsGrowth3Y),
+        epsGrowth5Y: num(m.epsGrowth5Y),
       };
     }
+    async function fetchFinancialsReported(t) { const r=await fetch(`https://finnhub.io/api/v1/stock/financials-reported?symbol=${encodeURIComponent(t)}&freq=annual&token=${encodeURIComponent(apiKey)}`); if(!r.ok)throw new Error(`fin ${r.status}`); return await r.json(); }
 
-    async function fetchFinancialsReported(ticker) {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/financials-reported?symbol=${encodeURIComponent(ticker)}&freq=annual&token=${encodeURIComponent(apiKey)}`);
-      if (!res.ok) throw new Error(`financials ${res.status}`);
-      return await res.json();
-    }
+    const CFO_CONCEPTS = ['NetCashProvidedByUsedInOperatingActivities','NetCashProvidedByOperatingActivities','CashFlowFromOperatingActivities','CashProvidedByUsedInOperatingActivities'];
+    const CAPEX_CONCEPTS = ['PaymentsToAcquirePropertyPlantAndEquipment','PaymentsForCapitalImprovements','PaymentsToAcquireProductiveAssets','PurchaseOfPropertyAndEquipment','CapitalExpenditures'];
+    const SHARES_CONCEPTS = ['WeightedAverageNumberOfDilutedSharesOutstanding','WeightedAverageNumberOfSharesOutstandingDiluted','WeightedAverageNumberOfSharesOutstandingBasic','CommonStockSharesOutstanding'];
+    const REVENUE_CONCEPTS = ['Revenues','RevenueFromContractWithCustomerExcludingAssessedTax','SalesRevenueNet','RevenueFromContractWithCustomerIncludingAssessedTax','TotalRevenues'];
 
-    const CFO_CONCEPTS = [
-      'NetCashProvidedByUsedInOperatingActivities',
-      'NetCashProvidedByOperatingActivities',
-      'CashFlowFromOperatingActivities',
-      'CashProvidedByUsedInOperatingActivities',
-    ];
-    const CAPEX_CONCEPTS = [
-      'PaymentsToAcquirePropertyPlantAndEquipment',
-      'PaymentsForCapitalImprovements',
-      'PaymentsToAcquireProductiveAssets',
-      'PurchaseOfPropertyAndEquipment',
-      'CapitalExpenditures',
-    ];
-    const SHARES_CONCEPTS = [
-      'WeightedAverageNumberOfDilutedSharesOutstanding',
-      'WeightedAverageNumberOfSharesOutstandingDiluted',
-      'WeightedAverageNumberOfSharesOutstandingBasic',
-      'CommonStockSharesOutstanding',
-    ];
-
-    function findConceptValue(reportSection, concepts) {
-      if (!Array.isArray(reportSection)) return null;
-      for (const concept of concepts) {
-        const exact = reportSection.find(x => x.concept === concept);
-        if (exact && typeof exact.value === 'number' && isFinite(exact.value)) return exact.value;
-      }
-      for (const item of reportSection) {
+    function findConceptValue(section, concepts, labelHints = []) {
+      if (!Array.isArray(section)) return null;
+      for (const c of concepts) { const hit = section.find(x => x.concept === c); if (hit && typeof hit.value === 'number' && isFinite(hit.value)) return hit.value; }
+      for (const item of section) {
         if (typeof item.label !== 'string' || typeof item.value !== 'number') continue;
-        const label = item.label.toLowerCase();
-        if (concepts === CFO_CONCEPTS && label.includes('operating') && label.includes('cash') && !label.includes('per share')) return item.value;
-        if (concepts === CAPEX_CONCEPTS && (label.includes('capital expenditure') || (label.includes('property') && label.includes('equipment') && label.includes('purchase')))) return item.value;
-        if (concepts === SHARES_CONCEPTS && label.includes('diluted') && label.includes('shares')) return item.value;
+        const lbl = item.label.toLowerCase();
+        if (labelHints.some(fn => fn(lbl))) return item.value;
       }
       return null;
     }
 
-    function extractFcfPerShare(financialsJson, fallbackShares) {
-      if (!financialsJson || !Array.isArray(financialsJson.data) || financialsJson.data.length === 0) return null;
-      const sorted = [...financialsJson.data].sort((a, b) => (b.year || 0) - (a.year || 0));
+    function extractFromFilings(fj, fallbackShares) {
+      if (!fj || !Array.isArray(fj.data) || !fj.data.length) return null;
+      const sorted = [...fj.data].sort((a,b)=>(b.year||0)-(a.year||0));
       for (const filing of sorted) {
-        const report = filing.report || {};
-        const cf = report.cf || [];
-        const ic = report.ic || [];
-        let cfo   = findConceptValue(cf, CFO_CONCEPTS);
-        let capex = findConceptValue(cf, CAPEX_CONCEPTS);
+        const r = filing.report||{}; const cf=r.cf||[], ic=r.ic||[];
+        let cfo = findConceptValue(cf, CFO_CONCEPTS, [l => l.includes('operating') && l.includes('cash') && !l.includes('per share')]);
+        let capex = findConceptValue(cf, CAPEX_CONCEPTS, [l => l.includes('capital expenditure') || (l.includes('property') && l.includes('equipment') && l.includes('purchase'))]);
+        let shares = findConceptValue(ic, SHARES_CONCEPTS, [l => l.includes('diluted') && l.includes('shares')]);
+        let revenue = findConceptValue(ic, REVENUE_CONCEPTS, [l => (l==='revenues'||l==='revenue'||l.includes('total revenue')||l.includes('net sales'))]);
         if (typeof capex === 'number') capex = Math.abs(capex);
-        let shares = findConceptValue(ic, SHARES_CONCEPTS);
         if (!shares || shares <= 0) shares = fallbackShares || null;
         if (typeof cfo === 'number' && typeof capex === 'number' && shares && shares > 0) {
           const fcf = cfo - capex;
-          const fcfPerShare = fcf / shares;
-          if (isFinite(fcfPerShare)) return { fcfPerShare, year: filing.year || null, cfo, capex, shares, fcf };
+          const fps = fcf/shares;
+          const fcfM = (typeof revenue==='number' && revenue > 0) ? fcf/revenue : null;
+          if (isFinite(fps)) return { fcfPerShare: fps, year: filing.year || null, revenue, fcfMargin: fcfM };
         }
       }
       return null;
     }
 
-    async function refreshAllPrices() {
-      if (!apiKey) { setStatus('⚠ No Finnhub API key — click "Set API key"', true); return; }
-      setStatus('Refreshing prices, metrics & financials…');
+    function computeAutoGrowth(m) {
+      const signals = [];
+      if (m.revenueGrowthTTM != null) signals.push({ v: m.revenueGrowthTTM / (Math.abs(m.revenueGrowthTTM) > 1 ? 100 : 1), w: 0.40 });
+      if (m.epsGrowth3Y != null) signals.push({ v: m.epsGrowth3Y / (Math.abs(m.epsGrowth3Y) > 1 ? 100 : 1), w: 0.30 });
+      if (m.epsGrowth5Y != null) signals.push({ v: m.epsGrowth5Y / (Math.abs(m.epsGrowth5Y) > 1 ? 100 : 1), w: 0.30 });
+      if (!signals.length) return null;
+      const totalW = signals.reduce((s,x)=>s+x.w,0);
+      const blend = signals.reduce((s,x)=>s+x.v*x.w,0)/totalW;
+      return Math.max(-0.05, Math.min(0.30, blend));
+    }
+    function computeAutoWACC(beta, de, macroS) {
+      if (beta == null) return null;
+      const { riskFreeRate: rf, equityRiskPremium: erp, costOfDebt: rd, taxRate: t } = macroS;
+      const dOverE = (de != null && isFinite(de)) ? Math.max(0, de > 5 ? de/100 : de) : 0;
+      const wE = 1/(1+dOverE), wD = dOverE/(1+dOverE);
+      const rE = rf + beta*erp;
+      const wacc = wE*rE + wD*rd*(1-t);
+      if (!isFinite(wacc) || wacc <= 0.02) return null;
+      return Math.max(0.04, Math.min(0.20, wacc));
+    }
 
-      const lastPrices     = loadLastPrices();
-      const lastMetrics    = loadLastMetrics();
-      const lastFinancials = loadLastFinancials();
+    function classifyIndustry(industry) {
+      if (!industry) return 'default';
+      const s = industry.toLowerCase();
+      if (s.includes('semi')) return 'semis';
+      if (s.includes('software') || s.includes('saas')) return 'software';
+      if (s.includes('cloud') || s.includes('internet')) return 'cloud';
+      if (s.includes('hardware') || s.includes('computer') || s.includes('electronic')) return 'hardware';
+      return 'default';
+    }
+
+    // ============ Valuation methods ============
+    function proxyFcfPerShare(price, pe, fcfMargin) {
+      if (!price || price <= 0) return null;
+      if (pe && pe > 0) { const eps = price/pe; return eps * ((fcfMargin || 0.10)/0.15); }
+      return price * (fcfMargin || 0.05) * 0.4;
+    }
+    function effectiveRate(c, field, fallback) {
+      const o = c.overrides ? c.overrides[field] : null;
+      if (o != null) return { value: o, source: 'override' };
+      const a = c.auto ? c.auto[field] : null;
+      if (a != null) return { value: a, source: 'auto' };
+      if (fallback != null) return { value: fallback, source: 'macro' };
+      return { value: null, source: 'none' };
+    }
+
+    function computeDCF(c) {
+      const price = c.livePrice ?? c.lastKnownPrice;
+      if (!price || price <= 0) return { intrinsic: null, note: 'no price', usingReal: false };
+      const g = effectiveRate(c,'growthRate',0.05).value ?? 0.05;
+      const r = effectiveRate(c,'discountRate',0.09).value ?? 0.09;
+      const fcfM = effectiveRate(c,'fcfMargin',0.10).value ?? 0.10;
+      const gT_raw = (c.overrides && c.overrides.terminalGrowth != null) ? c.overrides.terminalGrowth : macro.terminalGrowth;
+      const N = (c.overrides && c.overrides.years != null) ? c.overrides.years : macro.years;
+      let gT = gT_raw, capped = false;
+      if (gT >= r) { gT = r - 0.005; capped = true; }
+      const usingReal = (typeof c.fcfPerShare === 'number' && isFinite(c.fcfPerShare) && c.fcfPerShare > 0);
+      const fcf0 = usingReal ? c.fcfPerShare : proxyFcfPerShare(price, c.pe, fcfM);
+      if (!fcf0 || fcf0 <= 0) return { intrinsic: null, note: 'no FCF', usingReal };
+      let pvSum=0, fcfN=0;
+      for (let t=1; t<=N; t++) { const fcfT=fcf0*Math.pow(1+g,t); pvSum += fcfT/Math.pow(1+r,t); if(t===N)fcfN=fcfT; }
+      const tv = (fcfN*(1+gT))/(r-gT); const pvTv = tv/Math.pow(1+r,N);
+      return { intrinsic: pvSum+pvTv, note: capped?'terminal g capped':null, usingReal };
+    }
+
+    function computePEG(c) {
+      const price = c.livePrice ?? c.lastKnownPrice;
+      if (!price || !c.pe || c.pe <= 0) return { peg: null, fairValue: null };
+      const g = effectiveRate(c,'growthRate',null).value;
+      if (g == null || g <= 0.01) return { peg: null, fairValue: null };
+      const peg = c.pe / (g * 100);
+      const fairPEG = 1.5;
+      const fairValue = price * (fairPEG / peg);
+      return { peg, fairValue };
+    }
+
+    function computeRelative(c) {
+      const price = c.livePrice ?? c.lastKnownPrice;
+      if (!price || !c.pe || c.pe <= 0) return { sectorPE: null, fairValue: null };
+      const sector = classifyIndustry(c.industry);
+      const sectorPE = macro.sectorPE[sector] || macro.sectorPE.default;
+      const fairValue = price * (sectorPE / c.pe);
+      return { sectorPE, fairValue };
+    }
+
+    function computeReverseDCF(c) {
+      const price = c.livePrice ?? c.lastKnownPrice;
+      if (!price || price <= 0) return { impliedGrowth: null, actualGrowth: null };
+      const r = effectiveRate(c,'discountRate',0.09).value ?? 0.09;
+      const N = (c.overrides && c.overrides.years != null) ? c.overrides.years : macro.years;
+      const gT = macro.terminalGrowth;
+      const fcf0 = (typeof c.fcfPerShare === 'number' && c.fcfPerShare > 0) ? c.fcfPerShare : null;
+      if (!fcf0) return { impliedGrowth: null, actualGrowth: null };
+      let lo = -0.20, hi = 0.50;
+      for (let iter = 0; iter < 40; iter++) {
+        const mid = (lo + hi) / 2;
+        let pv = 0, fN = 0;
+        for (let t = 1; t <= N; t++) { const fT = fcf0*Math.pow(1+mid,t); pv += fT/Math.pow(1+r,t); if(t===N) fN=fT; }
+        const gTuse = gT >= r ? r - 0.005 : gT;
+        const tv = (fN*(1+gTuse))/(r-gTuse); const pvTv = tv/Math.pow(1+r,N);
+        const val = pv + pvTv;
+        if (val > price) hi = mid; else lo = mid;
+      }
+      const implied = (lo + hi) / 2;
+      const actual = effectiveRate(c,'growthRate',null).value;
+      return { impliedGrowth: implied, actualGrowth: actual };
+    }
+
+    function classifyByPct(fairValue, price) {
+      if (!fairValue || !price) return { label: 'wait', diff: null };
+      const diff = (fairValue - price) / price;
+      if (diff >= 0.25) return { label: 'buy', diff };
+      if (diff >= 0.05) return { label: 'hold', diff };
+      if (diff <= -0.15) return { label: 'sell', diff };
+      return { label: 'wait', diff };
+    }
+
+    function signalToScore(label) { return { buy: 1, hold: 0.33, wait: 0, sell: -1 }[label] ?? 0; }
+    function scoreToSignal(score) {
+      if (score >= 0.5) return 'buy';
+      if (score >= 0.1) return 'hold';
+      if (score <= -0.5) return 'sell';
+      return 'wait';
+    }
+
+    function computeAllSignals(c) {
+      const price = c.livePrice ?? c.lastKnownPrice;
+      const dcf = computeDCF(c);
+      const peg = computePEG(c);
+      const rel = computeRelative(c);
+      const rev = computeReverseDCF(c);
+      const dcfSig = classifyByPct(dcf.intrinsic, price);
+      const pegSig = classifyByPct(peg.fairValue, price);
+      const relSig = classifyByPct(rel.fairValue, price);
+      let revSig = { label: 'wait', diff: null };
+      if (rev.impliedGrowth != null && rev.actualGrowth != null) {
+        const gap = rev.actualGrowth - rev.impliedGrowth;
+        if (gap >= 0.05) revSig = { label: 'buy', diff: gap };
+        else if (gap >= 0.01) revSig = { label: 'hold', diff: gap };
+        else if (gap <= -0.05) revSig = { label: 'sell', diff: gap };
+        else revSig = { label: 'wait', diff: gap };
+      }
+      const g = effectiveRate(c,'growthRate',null).value;
+      let weights;
+      if (g == null) weights = { dcf: 0.4, peg: 0.2, rel: 0.3, rev: 0.1 };
+      else if (g > 0.15) weights = { dcf: 0.10, peg: 0.40, rel: 0.30, rev: 0.20 };
+      else if (g > 0.05) weights = { dcf: 0.30, peg: 0.25, rel: 0.30, rev: 0.15 };
+      else weights = { dcf: 0.50, peg: 0.10, rel: 0.30, rev: 0.10 };
+      let totalW = 0, score = 0;
+      const contribs = {};
+      const methods = { dcf: dcfSig, peg: pegSig, rel: relSig, rev: revSig };
+      Object.keys(methods).forEach(m => {
+        const s = methods[m];
+        if (s.diff != null || s.label !== 'wait') {
+          score += signalToScore(s.label) * weights[m];
+          totalW += weights[m];
+          contribs[m] = { label: s.label, weight: weights[m] };
+        } else {
+          contribs[m] = { label: s.label, weight: 0 };
+        }
+      });
+      const composite = totalW > 0 ? scoreToSignal(score / totalW) : 'wait';
+      const compositePos = { buy: 80, hold: 60, wait: 45, sell: 20 }[composite];
+      return { dcf, peg, rel, rev, dcfSig, pegSig, relSig, revSig, composite, compositePos, contribs, weights };
+    }
+
+    // ============ Refresh ============
+    async function refreshAllPrices() {
+      if (!apiKey) { setStatus('No API key set - click "API key"', true); return; }
+      setStatus('Refreshing...');
+      const lastPrices=loadLastPrices(), lastMetrics=loadLastMetrics(), lastFinancials=loadLastFinancials(), lastProfiles=loadLastProfiles();
       const now = Date.now();
 
       const results = await Promise.all(companies.map(async c => {
-        const out = { price: null, pe: null, evEbitda: null, sharesOut: null, fcfPerShare: null, fcfYear: null };
-        try { out.price = await fetchQuote(c.ticker); } catch (e) { console.warn(c.ticker, 'quote fail', e); }
-        try { const m = await fetchMetrics(c.ticker); out.pe = m.pe; out.evEbitda = m.evEbitda; out.sharesOut = m.sharesOut; }
-        catch (e) { console.warn(c.ticker, 'metric fail', e); }
-
-        const cached = lastFinancials[c.ticker];
-        let financialsJson = null;
-        if (cached && cached.raw && (now - cached.ts) < FIN_TTL_MS) {
-          financialsJson = cached.raw;
-        } else {
-          try {
-            financialsJson = await fetchFinancialsReported(c.ticker);
-            lastFinancials[c.ticker] = { raw: financialsJson, ts: now };
-          } catch (e) { console.warn(c.ticker, 'financials fail', e); }
-        }
-        if (financialsJson) {
-          const fcfExtract = extractFcfPerShare(financialsJson, out.sharesOut);
-          if (fcfExtract) { out.fcfPerShare = fcfExtract.fcfPerShare; out.fcfYear = fcfExtract.year; }
-        }
+        const out = { price:null, metrics:null, fcfData:null, profile:null };
+        try { out.price = await fetchQuote(c.ticker); } catch(e){ console.warn(c.ticker,'quote',e); }
+        try { out.metrics = await fetchMetrics(c.ticker); } catch(e){ console.warn(c.ticker,'metric',e); }
+        const cP = lastProfiles[c.ticker];
+        if (cP && cP.raw && (now - cP.ts) < PROFILE_TTL_MS) out.profile = cP.raw;
+        else { try { out.profile = await fetchProfile(c.ticker); lastProfiles[c.ticker] = { raw: out.profile, ts: now }; } catch(e){ console.warn(c.ticker,'profile',e); } }
+        const cF = lastFinancials[c.ticker];
+        let fj = null;
+        if (cF && cF.raw && (now - cF.ts) < FIN_TTL_MS) fj = cF.raw;
+        else { try { fj = await fetchFinancialsReported(c.ticker); lastFinancials[c.ticker] = { raw: fj, ts: now }; } catch(e){ console.warn(c.ticker,'fin',e); } }
+        if (fj) out.fcfData = extractFromFilings(fj, out.metrics ? out.metrics.sharesOut : null);
         return out;
       }));
 
-      let priceErr = 0, fcfMissing = 0;
-      results.forEach((r, i) => {
+      let priceErr = 0;
+      results.forEach((r,i) => {
         const c = companies[i];
         if (r.price != null) {
-          c.livePrice = r.price;
-          c.lastKnownPrice = r.price;
-          c.lastUpdated = new Date().toISOString();
+          c.livePrice = r.price; c.lastKnownPrice = r.price; c.lastUpdated = new Date().toISOString();
           lastPrices[c.ticker] = { price: r.price, ts: c.lastUpdated };
         } else {
-          priceErr++;
-          c.livePrice = null;
+          priceErr++; c.livePrice = null;
           if (lastPrices[c.ticker]) { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
         }
-        if (r.pe != null || r.evEbitda != null) {
-          c.pe = r.pe ?? c.pe;
-          c.evEbitda = r.evEbitda ?? c.evEbitda;
-          lastMetrics[c.ticker] = { pe: c.pe, evEbitda: c.evEbitda, ts: new Date().toISOString() };
+        if (r.profile && r.profile.name) {
+          if (!c.name || c.name === c.ticker) c.name = r.profile.name;
+          if (!c.profile) c.profile = `${r.profile.finnhubIndustry || 'Company'} - ${r.profile.country || ''}`.trim().replace(/-\s*$/, '');
+          c.industry = r.profile.finnhubIndustry || c.industry;
+        }
+        if (r.metrics) {
+          const m = r.metrics;
+          c.pe = m.pe ?? c.pe; c.evEbitda = m.evEbitda ?? c.evEbitda; c.beta = m.beta ?? c.beta; c.debtToEquity = m.debtToEquity ?? c.debtToEquity;
+          c.revenueGrowthTTM = m.revenueGrowthTTM ?? c.revenueGrowthTTM;
+          c.epsGrowth3Y = m.epsGrowth3Y ?? c.epsGrowth3Y; c.epsGrowth5Y = m.epsGrowth5Y ?? c.epsGrowth5Y;
+          lastMetrics[c.ticker] = { ...m, ts: new Date().toISOString() };
         } else if (lastMetrics[c.ticker]) {
-          c.pe = c.pe ?? lastMetrics[c.ticker].pe;
-          c.evEbitda = c.evEbitda ?? lastMetrics[c.ticker].evEbitda;
+          const m = lastMetrics[c.ticker];
+          c.pe = c.pe ?? m.pe; c.evEbitda = c.evEbitda ?? m.evEbitda;
+          c.beta = c.beta ?? m.beta; c.debtToEquity = c.debtToEquity ?? m.debtToEquity;
+          c.revenueGrowthTTM = c.revenueGrowthTTM ?? m.revenueGrowthTTM;
+          c.epsGrowth3Y = c.epsGrowth3Y ?? m.epsGrowth3Y; c.epsGrowth5Y = c.epsGrowth5Y ?? m.epsGrowth5Y;
         }
-        if (r.fcfPerShare != null) {
-          c.fcfPerShare = r.fcfPerShare;
-          c.fcfSourceYear = r.fcfYear;
-        } else if (c.fcfPerShare == null) {
-          fcfMissing++;
+        if (r.fcfData) {
+          c.fcfPerShare = r.fcfData.fcfPerShare; c.fcfSourceYear = r.fcfData.year;
+          c.revenue = r.fcfData.revenue;
+          if (r.fcfData.fcfMargin != null) c.fcfMargin = r.fcfData.fcfMargin;
         }
+        c.auto = c.auto || {};
+        c.auto.growthRate = computeAutoGrowth(c);
+        c.auto.discountRate = computeAutoWACC(c.beta, c.debtToEquity, macro);
+        c.auto.fcfMargin = c.fcfMargin ?? null;
       });
 
-      saveLastPrices(lastPrices);
-      saveLastMetrics(lastMetrics);
-      saveLastFinancials(lastFinancials);
-
-      const grid = document.getElementById('companyGrid');
-      const cards = grid.querySelectorAll('.card');
-      companies.forEach((c, i) => {
-        const card = cards[i];
-        if (!card) return;
-        updatePriceDisplay(card, c);
-        updateMetricsDisplay(card, c);
-        updateIntrinsicAndGauge(card, c);
-      });
-
+      saveLastPrices(lastPrices); saveLastMetrics(lastMetrics); saveLastFinancials(lastFinancials); saveLastProfiles(lastProfiles);
+      saveCompanies();
+      snapshotHistory();
+      renderGrid(); updatePortfolioBar();
       const parts = [`Updated ${new Date().toLocaleTimeString()}`];
       if (priceErr) parts.push(`${priceErr} price err`);
-      if (fcfMissing) parts.push(`${fcfMissing} using proxy FCF`);
-      setStatus(parts.join(' · '), priceErr > 0);
+      setStatus(parts.join(' - '), priceErr > 0);
     }
 
-    function proxyFcfPerShare(price, pe, fcfMargin) {
-      if (!price || price <= 0) return null;
-      if (pe && pe > 0 && isFinite(pe)) {
-        const eps = price / pe;
-        return eps * ((fcfMargin || 0.10) / 0.15);
+    // ============ History snapshots ============
+    function snapshotHistory() {
+      const hist = loadHistory();
+      const today = new Date().toISOString().slice(0, 10);
+      companies.forEach(c => {
+        const price = c.livePrice ?? c.lastKnownPrice;
+        const sig = computeAllSignals(c);
+        const intrinsic = sig.dcf.intrinsic;
+        if (price == null) return;
+        if (!hist[c.ticker]) hist[c.ticker] = [];
+        const existing = hist[c.ticker].findIndex(x => x.date === today);
+        const entry = { date: today, price, intrinsic: intrinsic ?? null, composite: sig.composite };
+        if (existing >= 0) hist[c.ticker][existing] = entry;
+        else hist[c.ticker].push(entry);
+        if (hist[c.ticker].length > HISTORY_MAX_DAYS) hist[c.ticker] = hist[c.ticker].slice(-HISTORY_MAX_DAYS);
+      });
+      saveHistory(hist);
+    }
+
+    function drawHistoryChart(ticker) {
+      const hist = loadHistory();
+      const data = hist[ticker] || [];
+      const canvas = document.getElementById('historyChart');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      document.getElementById('historyTitle').textContent = `${ticker} - Price vs. Intrinsic (past ${data.length} day${data.length !== 1 ? 's' : ''})`;
+      if (data.length < 2) {
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--muted');
+        ctx.font = '13px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText('Not enough history yet. Come back tomorrow!', W/2, H/2);
+        document.getElementById('historyStats').textContent = '';
+        return;
       }
-      return price * (fcfMargin || 0.05) * 0.4;
+      const prices = data.map(d => d.price).filter(x => x != null);
+      const intrins = data.map(d => d.intrinsic).filter(x => x != null);
+      const allVals = [...prices, ...intrins];
+      const min = Math.min(...allVals) * 0.95;
+      const max = Math.max(...allVals) * 1.05;
+      const pad = 20; const plotW = W - pad*2, plotH = H - pad*2;
+      const xAt = i => pad + (i / (data.length - 1)) * plotW;
+      const yAt = v => pad + plotH - ((v - min) / (max - min)) * plotH;
+      ctx.strokeStyle = 'rgba(148,163,184,0.15)'; ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) { const y = pad + (i / 4) * plotH; ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke(); }
+      ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+      data.forEach((d, i) => { if (d.price != null) { i === 0 ? ctx.moveTo(xAt(i), yAt(d.price)) : ctx.lineTo(xAt(i), yAt(d.price)); } });
+      ctx.stroke();
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2; ctx.setLineDash([5, 3]); ctx.beginPath();
+      let firstInt = true;
+      data.forEach((d, i) => { if (d.intrinsic != null) { firstInt ? ctx.moveTo(xAt(i), yAt(d.intrinsic)) : ctx.lineTo(xAt(i), yAt(d.intrinsic)); firstInt = false; } });
+      ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--muted'); ctx.font = '10px system-ui';
+      ctx.textAlign = 'left'; ctx.fillText('$' + max.toFixed(0), 2, pad + 4);
+      ctx.fillText('$' + min.toFixed(0), 2, H - pad + 4);
+      const latest = data[data.length - 1]; const first = data[0];
+      const priceChange = ((latest.price - first.price) / first.price * 100).toFixed(1);
+      document.getElementById('historyStats').innerHTML = `
+        Latest price: <strong>$${latest.price.toFixed(2)}</strong> (${priceChange >= 0 ? '+' : ''}${priceChange}% over period)<br/>
+        Latest intrinsic: <strong>${latest.intrinsic != null ? '$' + latest.intrinsic.toFixed(2) : 'N/A'}</strong><br/>
+        Current signal: <strong>${latest.composite || 'wait'}</strong>
+      `;
     }
 
-    function computeDCF(price, a, pe, realFcfPerShare) {
-      if (!price || price <= 0) return { intrinsic: null, note: 'no price', usingReal: false };
-      const g   = a.growthRate ?? 0;
-      const r   = a.discountRate ?? 0.09;
-      const N   = Math.max(1, a.years ?? 5);
-      let   gT  = a.terminalGrowth ?? 0.025;
-      const fcfM = a.fcfMargin ?? 0.10;
-
-      let capped = false;
-      if (gT >= r) { gT = r - 0.005; capped = true; }
-
-      const usingReal = (typeof realFcfPerShare === 'number' && isFinite(realFcfPerShare) && realFcfPerShare > 0);
-      const fcf0 = usingReal ? realFcfPerShare : proxyFcfPerShare(price, pe, fcfM);
-      if (!fcf0 || fcf0 <= 0) return { intrinsic: null, note: 'no FCF', usingReal };
-
-      let pvSum = 0, fcfN = 0;
-      for (let t = 1; t <= N; t++) {
-        const fcfT = fcf0 * Math.pow(1 + g, t);
-        pvSum += fcfT / Math.pow(1 + r, t);
-        if (t === N) fcfN = fcfT;
-      }
-      const tv   = (fcfN * (1 + gT)) / (r - gT);
-      const pvTv = tv / Math.pow(1 + r, N);
-
-      const notes = [];
-      if (capped) notes.push('terminal g capped at r-0.5%');
-      if (!usingReal) notes.push('proxy FCF from P/E');
-      return { intrinsic: pvSum + pvTv, note: notes.join('; ') || null, usingReal, fcf0 };
+    function updatePortfolioBar() {
+      const metricsEl = document.getElementById('portfolioMetrics');
+      const signalEl = document.getElementById('signalBreakdown');
+      const exclusionEl = document.getElementById('exclusionNote');
+      const anyShares = companies.some(c => c.shares && c.shares > 0);
+      const activeMode = (weightMode === 'position' && anyShares) ? 'position' : (weightMode === 'position' ? 'position' : 'equal');
+      document.querySelectorAll('#weightToggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === activeMode));
+      let totalPrice=0, totalIntrinsic=0, weightedG=0, weightedR=0;
+      const signals = { buy:0, hold:0, wait:0, sell:0 };
+      const signalValues = { buy:0, hold:0, wait:0, sell:0 };
+      let excluded = 0, included = 0;
+      companies.forEach(c => {
+        const price = c.livePrice ?? c.lastKnownPrice;
+        const sig = computeAllSignals(c);
+        const intrinsic = sig.dcf.intrinsic;
+        if (!price || intrinsic == null) { excluded++; return; }
+        const w = activeMode === 'position' ? (c.shares || 0) : 1;
+        if (activeMode === 'position' && w === 0) { excluded++; return; }
+        included++;
+        totalPrice += price * w;
+        totalIntrinsic += intrinsic * w;
+        const g = effectiveRate(c,'growthRate',0.05).value ?? 0.05;
+        const r = effectiveRate(c,'discountRate',0.09).value ?? 0.09;
+        const dollarW = activeMode === 'position' ? price * w : w;
+        weightedG += g * dollarW; weightedR += r * dollarW;
+        signals[sig.composite]++;
+        signalValues[sig.composite] += price * w;
+      });
+      const totalDollarW = activeMode === 'position' ? companies.reduce((s,c) => s + ((c.livePrice ?? c.lastKnownPrice ?? 0) * (c.shares || 0)), 0) : included;
+      const upside = totalPrice > 0 ? (totalIntrinsic - totalPrice) / totalPrice : null;
+      const avgG = totalDollarW > 0 ? weightedG / totalDollarW : null;
+      const avgR = totalDollarW > 0 ? weightedR / totalDollarW : null;
+      const fmt$ = v => v == null ? 'N/A' : ('$' + v.toLocaleString(undefined, { maximumFractionDigits: 0 }));
+      const fmtPct = v => v == null ? 'N/A' : ((v*100).toFixed(1) + '%');
+      const upsideClass = upside == null ? '' : (upside >= 0 ? 'pos' : 'neg');
+      const mvLabel = activeMode === 'position' ? 'Portfolio market value' : 'Sum of share prices';
+      const ivLabel = activeMode === 'position' ? 'Portfolio intrinsic value' : 'Sum of intrinsic values';
+      metricsEl.innerHTML = `
+        <div class="pm-cell"><span class="pm-label">Positions</span><span class="pm-value">${included}${excluded ? ` <span style="font-size:0.7rem;color:var(--muted);font-weight:400;">/ ${included+excluded}</span>` : ''}</span><span class="pm-sub">${activeMode==='position'?'with shares > 0':'in watchlist'}</span></div>
+        <div class="pm-cell"><span class="pm-label">${mvLabel}</span><span class="pm-value">${fmt$(totalPrice)}</span><span class="pm-sub">${activeMode==='position'?'total exposure':'equal weight'}</span></div>
+        <div class="pm-cell"><span class="pm-label">${ivLabel}</span><span class="pm-value">${fmt$(totalIntrinsic)}</span><span class="pm-sub">DCF-derived</span></div>
+        <div class="pm-cell"><span class="pm-label">Upside / downside</span><span class="pm-value ${upsideClass}">${upside!=null?(upside>=0?'+':'')+(upside*100).toFixed(1)+'%':'N/A'}</span><span class="pm-sub">intrinsic vs price</span></div>
+        <div class="pm-cell"><span class="pm-label">Avg WACC / growth</span><span class="pm-value" style="font-size:0.9rem;">${fmtPct(avgR)} / ${fmtPct(avgG)}</span><span class="pm-sub">${activeMode==='position'?'$-weighted':'equal-weighted'}</span></div>
+      `;
+      const chips = ['buy','hold','wait','sell'].map(label => {
+        const cnt = signals[label]; if (cnt === 0) return '';
+        const pctV = totalPrice > 0 ? ((signalValues[label]/totalPrice)*100).toFixed(0) : null;
+        const pctStr = pctV != null && activeMode === 'position' ? ` - ${pctV}%` : '';
+        return `<span class="signal-chip ${label}">${label.toUpperCase()} ${cnt}${pctStr}</span>`;
+      }).join('');
+      signalEl.innerHTML = chips || '<span style="font-size:0.7rem;color:var(--muted);">No signals yet - refresh to populate</span>';
+      exclusionEl.textContent = excluded > 0 ? `Note: ${excluded} position${excluded>1?'s':''} excluded (missing price, DCF, or ${activeMode==='position'?'shares':'data'}).` : '';
     }
 
-    function classifySignal(price, intrinsic) {
-      if (!price || !intrinsic) return { label: 'wait', pos: 50 };
-      const diff = (intrinsic - price) / price;
-      if (diff >=  0.25) return { label: 'buy',  pos: 80 };
-      if (diff >=  0.05) return { label: 'hold', pos: 60 };
-      if (diff <= -0.15) return { label: 'sell', pos: 20 };
-      return { label: 'wait', pos: 45 };
+    function inputHtml(field, unitLabel, val, source, resettable = true) {
+      const badge = source === 'override' ? `<span class="auto-badge override">override</span>` : source === 'auto' ? `<span class="auto-badge">auto</span>` : `<span class="auto-badge" style="background:rgba(148,163,184,0.15);color:var(--muted);">default</span>`;
+      const resetBtn = resettable && source === 'override' ? `<button class="reset-btn" data-reset="${field}">reset</button>` : '';
+      return `<div class="input-group"><label>${unitLabel} ${badge} ${resetBtn}</label><input type="number" step="0.1" value="${val!=null?val:''}" data-field="${field}" /></div>`;
     }
 
     function createCard(company) {
-      const card = document.createElement('div');
-      card.className = 'card';
+      const card = document.createElement('div'); card.className = 'card';
+      const g = effectiveRate(company,'growthRate',null);
+      const r = effectiveRate(company,'discountRate',null);
+      const f = effectiveRate(company,'fcfMargin',null);
+      const tgSrc = (company.overrides && company.overrides.terminalGrowth != null) ? 'override' : 'macro';
+      const yrsSrc = (company.overrides && company.overrides.years != null) ? 'override' : 'macro';
+      const tgVal = (company.overrides && company.overrides.terminalGrowth != null) ? company.overrides.terminalGrowth : macro.terminalGrowth;
+      const yrsVal = (company.overrides && company.overrides.years != null) ? company.overrides.years : macro.years;
+      const price = company.livePrice ?? company.lastKnownPrice;
+      const positionValue = (price && company.shares) ? price * company.shares : 0;
       card.innerHTML = `
         <div class="card-header">
-          <div class="card-header-left">
-            <div><div class="ticker">${company.ticker}</div><div class="company-name">${company.name}</div></div>
-            <button class="card-delete-btn" title="Remove">×</button>
+          <div class="card-header-actions">
+            <button class="card-icon-btn delete" title="Remove">&times;</button>
+            <button class="card-icon-btn history" title="View history">&#128200;</button>
+          </div>
+          <div class="card-header-info">
+            <div class="ticker">${company.ticker}</div>
+            <div class="company-name">${company.name || company.ticker}</div>
           </div>
           <div style="text-align:right;" class="live-price">
             <div class="price-row"><div class="price-value">N/A</div><div class="price-tag">live</div></div>
@@ -396,157 +739,287 @@
           </div>
         </div>
         <div class="section-row">
-          <div class="profile-text">${company.profile}</div>
+          <div class="profile-text">${company.profile || ''}</div>
           <div class="metrics-row">
             <div class="metric"><span>P/E (TTM)</span><span class="value pe-value">N/A</span></div>
             <div class="metric"><span>EV/EBITDA</span><span class="value ev-value">N/A</span></div>
+            <div class="metric"><span>Beta</span><span class="value beta-value">N/A</span></div>
+            <div class="metric"><span>D/E</span><span class="value de-value">N/A</span></div>
             <div class="metric"><span>FCF/share</span><span class="value fcf-value">N/A</span></div>
-            <div class="metric"><span>Source</span><span class="value fcf-source">—</span></div>
+            <div class="metric"><span>Source</span><span class="value fcf-source">-</span></div>
+          </div>
+          <div class="position-row">
+            <label>Shares</label>
+            <input type="number" min="0" step="1" data-field="shares" value="${company.shares || 0}" />
+            <span class="position-value">${positionValue > 0 ? '$' + positionValue.toLocaleString(undefined, {maximumFractionDigits: 0}) : '-'}</span>
           </div>
           <div class="inputs-row">
-            <div class="input-group"><label>Growth rate (%)</label><input type="number" step="0.1" min="-50" max="50" value="${(company.assumptions.growthRate*100).toFixed(1)}" data-field="growthRate" /></div>
-            <div class="input-group"><label>Discount rate (%)</label><input type="number" step="0.1" min="0" max="50" value="${(company.assumptions.discountRate*100).toFixed(1)}" data-field="discountRate" /></div>
-            <div class="input-group"><label>FCF margin (%) *proxy only</label><input type="number" step="0.1" min="-50" max="80" value="${(company.assumptions.fcfMargin*100).toFixed(1)}" data-field="fcfMargin" /></div>
-            <div class="input-group"><label>Terminal g (%)</label><input type="number" step="0.1" min="0" max="10" value="${(company.assumptions.terminalGrowth*100).toFixed(1)}" data-field="terminalGrowth" /></div>
-            <div class="input-group"><label>Horizon (yrs)</label><input type="number" step="1" min="1" max="15" value="${company.assumptions.years}" data-field="years" /></div>
+            ${inputHtml('growthRate','Growth (%)', g.value!=null?(g.value*100).toFixed(1):null, g.source)}
+            ${inputHtml('discountRate','WACC (%)', r.value!=null?(r.value*100).toFixed(1):null, r.source)}
+            ${inputHtml('fcfMargin','FCF margin (%)', f.value!=null?(f.value*100).toFixed(1):null, f.source)}
+            ${inputHtml('terminalGrowth','Terminal g (%)', (tgVal*100).toFixed(1), tgSrc)}
+            ${inputHtml('years','Horizon (yrs)', yrsVal, yrsSrc)}
           </div>
           <div class="intrinsic-row"><span>Intrinsic value (DCF)</span><span class="value intrinsic-value">N/A</span></div>
-          <div class="gauge-row"><span class="gauge-label">Signal</span><div class="gauge-bar"><div class="gauge-indicator"></div></div><span class="gauge-text wait">wait</span></div>
+          <div class="method-signals" title="Individual method signals"></div>
+          <div class="gauge-row"><span class="gauge-label">Composite</span><div class="gauge-bar"><div class="gauge-indicator"></div></div><span class="gauge-text wait">wait</span></div>
         </div>`;
 
-      card.querySelector('.card-delete-btn').addEventListener('click', () => {
+      card.querySelector('.card-icon-btn.delete').addEventListener('click', () => {
         if (confirm(`Remove ${company.ticker}?`)) {
-          const idx = companies.indexOf(company);
-          if (idx > -1) companies.splice(idx, 1);
-          saveCompanies();
-          renderGrid();
+          const idx = companies.indexOf(company); if (idx > -1) companies.splice(idx, 1);
+          saveCompanies(); renderGrid(); updatePortfolioBar();
         }
       });
 
-      card.querySelectorAll('.input-group input').forEach(input => {
+      card.querySelector('.card-icon-btn.history').addEventListener('click', () => {
+        document.getElementById('historyModal').classList.add('open');
+        drawHistoryChart(company.ticker);
+      });
+
+      card.querySelectorAll('.input-group input, .position-row input').forEach(input => {
         input.addEventListener('input', () => {
-          const f = input.dataset.field;
-          const v = parseFloat(input.value);
-          if (isNaN(v)) return;
-          if (['growthRate','discountRate','fcfMargin','terminalGrowth'].includes(f)) company.assumptions[f] = v / 100;
-          else if (f === 'years') company.assumptions.years = Math.max(1, Math.round(v));
-          saveCompanies();
-          updateIntrinsicAndGauge(card, company);
+          const f = input.dataset.field; const v = parseFloat(input.value); if (isNaN(v)) return;
+          if (f === 'shares') company.shares = Math.max(0, Math.round(v));
+          else { company.overrides = company.overrides || {}; if (['growthRate','discountRate','fcfMargin','terminalGrowth'].includes(f)) company.overrides[f] = v/100; else if (f === 'years') company.overrides.years = Math.max(1, Math.round(v)); }
+          saveCompanies(); renderCard(card, company); updatePortfolioBar();
+        });
+      });
+
+      card.querySelectorAll('.reset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const f = btn.dataset.reset; if (company.overrides) company.overrides[f] = null;
+          saveCompanies(); renderCard(card, company); updatePortfolioBar();
         });
       });
       return card;
     }
 
-    function formatWhen(ts) {
-      if (!ts) return '';
-      const d = new Date(ts);
-      return isNaN(d.getTime()) ? '' : d.toLocaleString();
+    function renderCard(card, c) {
+      const newCard = createCard(c);
+      card.replaceWith(newCard);
+      updatePriceDisplay(newCard, c); updateMetricsDisplay(newCard, c); updateSignalsDisplay(newCard, c);
     }
 
+    function formatWhen(ts) { if (!ts) return ''; const d = new Date(ts); return isNaN(d.getTime()) ? '' : d.toLocaleString(); }
+
     function updatePriceDisplay(card, c) {
-      const v = card.querySelector('.price-value');
-      const t = card.querySelector('.price-tag');
-      const m = card.querySelector('.price-meta');
-      if (c.livePrice != null) {
-        v.textContent = '$' + c.livePrice.toFixed(2); t.textContent = 'live'; m.textContent = formatWhen(c.lastUpdated);
-      } else if (c.lastKnownPrice != null) {
-        v.textContent = '$' + c.lastKnownPrice.toFixed(2); t.textContent = 'last';
-        const w = formatWhen(c.lastUpdated); m.textContent = w ? 'as of ' + w : '';
-      } else { v.textContent = 'N/A'; t.textContent = '—'; m.textContent = ''; }
+      const v=card.querySelector('.price-value'), t=card.querySelector('.price-tag'), m=card.querySelector('.price-meta');
+      if (c.livePrice != null) { v.textContent = '$' + c.livePrice.toFixed(2); t.textContent = 'live'; m.textContent = formatWhen(c.lastUpdated); }
+      else if (c.lastKnownPrice != null) { v.textContent = '$' + c.lastKnownPrice.toFixed(2); t.textContent = 'last'; const w = formatWhen(c.lastUpdated); m.textContent = w ? 'as of ' + w : ''; }
+      else { v.textContent = 'N/A'; t.textContent = '-'; m.textContent = ''; }
     }
 
     function updateMetricsDisplay(card, c) {
-      card.querySelector('.pe-value').textContent  = (typeof c.pe === 'number' && isFinite(c.pe)) ? c.pe.toFixed(1) : 'N/A';
-      card.querySelector('.ev-value').textContent  = (typeof c.evEbitda === 'number' && isFinite(c.evEbitda)) ? c.evEbitda.toFixed(1) : 'N/A';
-      card.querySelector('.fcf-value').textContent = (typeof c.fcfPerShare === 'number' && isFinite(c.fcfPerShare)) ? ('$' + c.fcfPerShare.toFixed(2)) : 'N/A';
+      const fmt = (v, d = 1, prefix = '') => (typeof v === 'number' && isFinite(v)) ? (prefix + v.toFixed(d)) : 'N/A';
+      card.querySelector('.pe-value').textContent = fmt(c.pe);
+      card.querySelector('.ev-value').textContent = fmt(c.evEbitda);
+      card.querySelector('.beta-value').textContent = fmt(c.beta, 2);
+      card.querySelector('.de-value').textContent = fmt(c.debtToEquity, 2);
+      card.querySelector('.fcf-value').textContent = fmt(c.fcfPerShare, 2, '$');
       card.querySelector('.fcf-source').textContent = c.fcfSourceYear ? ('10-K ' + c.fcfSourceYear) : (c.fcfPerShare != null ? 'reported' : 'proxy');
     }
 
-    function updateIntrinsicAndGauge(card, c) {
+    function updateSignalsDisplay(card, c) {
+      const sig = computeAllSignals(c);
       const iEl = card.querySelector('.intrinsic-value');
-      const gI  = card.querySelector('.gauge-indicator');
-      const gT  = card.querySelector('.gauge-text');
-      const price = c.livePrice ?? c.lastKnownPrice;
-      const { intrinsic, note, usingReal } = computeDCF(price, c.assumptions, c.pe, c.fcfPerShare);
       if (iEl) {
-        iEl.textContent = intrinsic != null ? ('$' + intrinsic.toFixed(2) + (note ? ' *' : '')) : 'N/A';
-        iEl.title = note || (usingReal ? 'Using reported FCF/share' : '');
-        iEl.style.color = usingReal ? 'var(--success)' : '';
+        iEl.textContent = sig.dcf.intrinsic != null ? ('$' + sig.dcf.intrinsic.toFixed(2) + (sig.dcf.note ? ' *' : '')) : 'N/A';
+        iEl.title = sig.dcf.note || (sig.dcf.usingReal ? 'Using reported FCF/share' : '');
+        iEl.style.color = sig.dcf.usingReal ? 'var(--success)' : '';
       }
-      const s = classifySignal(price, intrinsic);
-      if (gI) gI.style.left = s.pos + '%';
-      if (gT) { gT.textContent = s.label; gT.className = 'gauge-text ' + s.label; }
+      const chipsEl = card.querySelector('.method-signals');
+      const chips = [
+        { key: 'dcf', label: 'DCF', sig: sig.dcfSig, weight: sig.weights.dcf },
+        { key: 'peg', label: 'PEG', sig: sig.pegSig, weight: sig.weights.peg },
+        { key: 'rel', label: 'Rel', sig: sig.relSig, weight: sig.weights.rel },
+        { key: 'rev', label: 'Rev', sig: sig.revSig, weight: sig.weights.rev },
+      ];
+      chipsEl.innerHTML = chips.map(x => `<span class="method-chip ${x.sig.label}" title="${x.label}: ${(x.weight*100).toFixed(0)}% weight"><span class="m-label">${x.label}</span> ${x.sig.label}</span>`).join('');
+      const gI = card.querySelector('.gauge-indicator'); const gT = card.querySelector('.gauge-text');
+      if (gI) gI.style.left = sig.compositePos + '%';
+      if (gT) { gT.textContent = sig.composite; gT.className = 'gauge-text ' + sig.composite; }
     }
 
     function renderGrid() {
-      const grid = document.getElementById('companyGrid');
-      grid.innerHTML = '';
+      const grid = document.getElementById('companyGrid'); grid.innerHTML = '';
       companies.forEach(c => {
-        const card = createCard(c);
-        grid.appendChild(card);
-        updatePriceDisplay(card, c);
-        updateMetricsDisplay(card, c);
-        updateIntrinsicAndGauge(card, c);
+        const card = createCard(c); grid.appendChild(card);
+        updatePriceDisplay(card, c); updateMetricsDisplay(card, c); updateSignalsDisplay(card, c);
       });
     }
 
-    function addCompanyPrompt() {
-      const ticker = (prompt('Enter ticker (e.g., NVDA):') || '').trim().toUpperCase();
-      if (!ticker) return;
-      if (companies.some(c => c.ticker === ticker)) { alert(`${ticker} already added.`); return; }
-      const name     = prompt('Company name:') || ticker;
-      const category = prompt('Category:') || 'Custom';
-      const profile  = prompt('Short profile:') || 'User-added company.';
-      companies.push({ ticker, name, category, profile, livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
-        assumptions: { growthRate: 0.10, discountRate: 0.09, fcfMargin: 0.15, terminalGrowth: 0.025, years: 5 } });
-      saveCompanies();
-      renderGrid();
-      refreshAllPrices();
+    let pendingAdd = null;
+    function openAddModal() {
+      ['newTickerInput','newCategoryInput','newProfileInput','newSharesInput'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('lookupPreview').textContent = 'Enter a ticker and click "Look up" to autofill.';
+      document.getElementById('confirmAddBtn').disabled = true; pendingAdd = null;
+      document.getElementById('addModal').classList.add('open');
+    }
+    function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+    async function doLookup() {
+      const ticker = document.getElementById('newTickerInput').value.trim().toUpperCase();
+      const preview = document.getElementById('lookupPreview');
+      const confirmBtn = document.getElementById('confirmAddBtn');
+      if (!ticker) { preview.textContent = 'Enter a ticker first.'; return; }
+      if (companies.some(c => c.ticker === ticker)) { preview.textContent = `${ticker} is already added.`; return; }
+      if (!apiKey) { preview.textContent = 'Set your API key first.'; return; }
+      preview.textContent = 'Looking up...';
+      try {
+        const profile = await fetchProfile(ticker);
+        if (!profile || !profile.name) {
+          preview.textContent = `No profile found for ${ticker}. You can still add manually.`;
+          pendingAdd = { ticker, name: ticker, industry: '', country: '' }; confirmBtn.disabled = false; return;
+        }
+        pendingAdd = { ticker, name: profile.name, industry: profile.finnhubIndustry || '', country: profile.country || '', exchange: profile.exchange || '' };
+        preview.innerHTML = `<strong>${profile.name}</strong> (${profile.exchange || '-'})<br/>Industry: ${profile.finnhubIndustry || 'N/A'}<br/>Country: ${profile.country || 'N/A'}<br/>Market cap: ${profile.marketCapitalization ? '$' + Math.round(profile.marketCapitalization).toLocaleString() + 'M' : 'N/A'}`;
+        if (!document.getElementById('newCategoryInput').value) document.getElementById('newCategoryInput').value = profile.finnhubIndustry || 'Custom';
+        confirmBtn.disabled = false;
+      } catch (e) { preview.textContent = `Lookup failed: ${e.message}`; }
     }
 
-    function promptForApiKey() {
-      const k = prompt('Paste your Finnhub API key:', loadApiKey());
-      if (k === null) return;
-      apiKey = k.trim();
-      saveApiKey(apiKey);
-      refreshAllPrices();
+    function confirmAdd() {
+      if (!pendingAdd) return;
+      const category = document.getElementById('newCategoryInput').value.trim() || pendingAdd.industry || 'Custom';
+      const userProfile = document.getElementById('newProfileInput').value.trim();
+      const shares = parseInt(document.getElementById('newSharesInput').value, 10) || 0;
+      const autoProfile = `${pendingAdd.industry || 'Company'} - ${pendingAdd.country || ''}`.trim().replace(/-\s*$/, '');
+      companies.push({
+        ticker: pendingAdd.ticker, name: pendingAdd.name, category, profile: userProfile || autoProfile, industry: pendingAdd.industry,
+        livePrice: null, lastKnownPrice: null, lastUpdated: null,
+        pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        beta: null, debtToEquity: null,
+        revenueGrowthTTM: null, epsGrowth3Y: null, epsGrowth5Y: null,
+        revenue: null, fcf: null, fcfMargin: null,
+        shares,
+        auto: { growthRate: null, discountRate: null, fcfMargin: null },
+        overrides: { growthRate: null, discountRate: null, fcfMargin: null, terminalGrowth: null, years: null },
+      });
+      saveCompanies(); closeAddModal(); renderGrid(); updatePortfolioBar(); refreshAllPrices();
+    }
+
+    function exportCSV() {
+      const headers = ['Ticker','Name','Category','Industry','Price','P/E','EV/EBITDA','Beta','D/E','FCF/share','FCF year','Growth %','WACC %','FCF margin %','Terminal g %','Horizon','Intrinsic (DCF)','PEG','PEG fair value','Sector P/E','Rel fair value','Implied growth %','Composite signal','Shares','Position value'];
+      const rows = companies.map(c => {
+        const sig = computeAllSignals(c);
+        const price = c.livePrice ?? c.lastKnownPrice;
+        const g = effectiveRate(c,'growthRate',null).value;
+        const r = effectiveRate(c,'discountRate',null).value;
+        const f = effectiveRate(c,'fcfMargin',null).value;
+        const positionValue = (price && c.shares) ? price * c.shares : 0;
+        return [
+          c.ticker, c.name || '', c.category || '', c.industry || '',
+          price != null ? price.toFixed(2) : '',
+          c.pe != null ? c.pe.toFixed(2) : '',
+          c.evEbitda != null ? c.evEbitda.toFixed(2) : '',
+          c.beta != null ? c.beta.toFixed(2) : '',
+          c.debtToEquity != null ? c.debtToEquity.toFixed(2) : '',
+          c.fcfPerShare != null ? c.fcfPerShare.toFixed(2) : '',
+          c.fcfSourceYear || '',
+          g != null ? (g * 100).toFixed(2) : '',
+          r != null ? (r * 100).toFixed(2) : '',
+          f != null ? (f * 100).toFixed(2) : '',
+          (macro.terminalGrowth * 100).toFixed(2),
+          macro.years,
+          sig.dcf.intrinsic != null ? sig.dcf.intrinsic.toFixed(2) : '',
+          sig.peg.peg != null ? sig.peg.peg.toFixed(2) : '',
+          sig.peg.fairValue != null ? sig.peg.fairValue.toFixed(2) : '',
+          sig.rel.sectorPE || '',
+          sig.rel.fairValue != null ? sig.rel.fairValue.toFixed(2) : '',
+          sig.rev.impliedGrowth != null ? (sig.rev.impliedGrowth * 100).toFixed(2) : '',
+          sig.composite,
+          c.shares || 0,
+          positionValue.toFixed(2),
+        ];
+      });
+      const escape = v => { const s = String(v); return (s.includes(',') || s.includes('"') || s.includes('\n')) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+      const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = `valuation_dashboard_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+    }
+
+    function bindSettings() {
+      const fields = [
+        { key: 'riskFreeRate', input: 'rfInput', pct: true },
+        { key: 'equityRiskPremium', input: 'erpInput', pct: true },
+        { key: 'costOfDebt', input: 'rdInput', pct: true },
+        { key: 'taxRate', input: 'taxInput', pct: true },
+        { key: 'terminalGrowth', input: 'tgInput', pct: true },
+        { key: 'years', input: 'yearsInput', pct: false },
+      ];
+      fields.forEach(f => {
+        const el = document.getElementById(f.input);
+        el.value = f.pct ? (macro[f.key] * 100).toFixed(2) : macro[f.key];
+        el.addEventListener('input', () => {
+          const v = parseFloat(el.value); if (isNaN(v)) return;
+          macro[f.key] = f.pct ? v/100 : Math.max(1, Math.round(v));
+          saveMacro(); companies.forEach(c => { c.auto = c.auto || {}; c.auto.discountRate = computeAutoWACC(c.beta, c.debtToEquity, macro); });
+          renderGrid(); updatePortfolioBar();
+        });
+      });
+      const sectorFields = [{ key: 'semis', input: 'semisPeInput' }, { key: 'software', input: 'softwarePeInput' }, { key: 'hardware', input: 'hardwarePeInput' }];
+      sectorFields.forEach(f => {
+        const el = document.getElementById(f.input);
+        el.value = macro.sectorPE[f.key];
+        el.addEventListener('input', () => {
+          const v = parseFloat(el.value); if (isNaN(v)) return;
+          macro.sectorPE[f.key] = v; saveMacro(); renderGrid(); updatePortfolioBar();
+        });
+      });
+    }
+
+    function bindWeightToggle() {
+      document.querySelectorAll('#weightToggle button').forEach(btn => {
+        btn.addEventListener('click', () => { weightMode = btn.dataset.mode; saveWeightMode(weightMode); updatePortfolioBar(); });
+      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const savedMacro = loadMacro();
+      macro = { ...DEFAULT_MACRO, ...savedMacro, sectorPE: { ...DEFAULT_MACRO.sectorPE, ...((savedMacro && savedMacro.sectorPE) || {}) } };
+      weightMode = loadWeightMode();
+
       const saved = loadCompanies();
       companies = (saved && saved.length) ? saved : JSON.parse(JSON.stringify(defaultCompanies));
-
       companies.forEach(c => {
-        c.assumptions = c.assumptions || {};
-        if (c.assumptions.fcfMargin      == null) c.assumptions.fcfMargin      = 0.15;
-        if (c.assumptions.terminalGrowth == null) c.assumptions.terminalGrowth = 0.025;
-        if (c.assumptions.years          == null) c.assumptions.years          = 5;
-        if (c.fcfPerShare === undefined)   c.fcfPerShare = null;
-        if (c.fcfSourceYear === undefined) c.fcfSourceYear = null;
+        c.auto = c.auto || { growthRate: null, discountRate: null, fcfMargin: null };
+        c.overrides = c.overrides || { growthRate: null, discountRate: null, fcfMargin: null, terminalGrowth: null, years: null };
+        if (c.shares == null) c.shares = 0;
+        if (c.industry == null) c.industry = '';
       });
 
-      const lastPrices  = loadLastPrices();
-      const lastMetrics = loadLastMetrics();
+      const lastPrices = loadLastPrices(), lastMetrics = loadLastMetrics();
       companies.forEach(c => {
-        if (lastPrices[c.ticker])  { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
-        if (lastMetrics[c.ticker]) { c.pe = lastMetrics[c.ticker].pe; c.evEbitda = lastMetrics[c.ticker].evEbitda; }
+        if (lastPrices[c.ticker]) { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
+        if (lastMetrics[c.ticker]) { const m = lastMetrics[c.ticker]; c.pe = m.pe; c.evEbitda = m.evEbitda; c.beta = m.beta; c.debtToEquity = m.debtToEquity; c.revenueGrowthTTM = m.revenueGrowthTTM; c.epsGrowth3Y = m.epsGrowth3Y; c.epsGrowth5Y = m.epsGrowth5Y; }
+        c.auto.growthRate = computeAutoGrowth(c);
+        c.auto.discountRate = computeAutoWACC(c.beta, c.debtToEquity, macro);
       });
 
       apiKey = loadApiKey();
-      renderGrid();
+      bindSettings(); bindWeightToggle();
+      renderGrid(); updatePortfolioBar();
 
-      document.getElementById('addCompanyBtn').addEventListener('click', addCompanyPrompt);
+      document.getElementById('addCompanyBtn').addEventListener('click', openAddModal);
+      document.getElementById('cancelAddBtn').addEventListener('click', closeAddModal);
+      document.getElementById('lookupBtn').addEventListener('click', doLookup);
+      document.getElementById('confirmAddBtn').addEventListener('click', confirmAdd);
+      document.getElementById('newTickerInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLookup(); });
       document.getElementById('refreshNowBtn').addEventListener('click', refreshAllPrices);
-      document.getElementById('setApiKeyBtn').addEventListener('click', promptForApiKey);
+      document.getElementById('setApiKeyBtn').addEventListener('click', () => { const k = prompt('Paste your Finnhub API key:', loadApiKey()); if (k === null) return; apiKey = k.trim(); saveApiKey(apiKey); refreshAllPrices(); });
+      document.getElementById('settingsBtn').addEventListener('click', () => { document.getElementById('settingsPanel').classList.toggle('open'); });
+      document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+      document.getElementById('closeHistoryBtn').addEventListener('click', () => { document.getElementById('historyModal').classList.remove('open'); });
 
       const toggle = document.getElementById('themeToggle');
       if (loadTheme() === 'dark') { document.body.classList.add('dark-theme'); toggle.checked = true; }
-      toggle.addEventListener('change', e => {
-        document.body.classList.toggle('dark-theme', e.target.checked);
-        saveTheme(e.target.checked ? 'dark' : 'light');
-      });
+      toggle.addEventListener('change', e => { document.body.classList.toggle('dark-theme', e.target.checked); saveTheme(e.target.checked ? 'dark' : 'light'); });
 
-      if (!apiKey) setStatus('⚠ No Finnhub API key — click "Set API key"', true);
+      if (!apiKey) setStatus('No API key - click "API key"', true);
       setInterval(refreshAllPrices, 60000);
       refreshAllPrices();
     });
