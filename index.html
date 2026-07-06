@@ -46,7 +46,6 @@
     .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
     .toolbar button, .toolbar select { border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); color: var(--text); padding: 8px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
     .toolbar button.primary { background: linear-gradient(135deg, var(--accent-soft), var(--accent)); border: none; color: #0b1120; font-weight: 600; box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15); }
-    .toolbar button svg { width: 14px; height: 14px; }
     .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (min-width: 960px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -97,115 +96,298 @@
   <div class="app">
     <header>
       <h1><span class="logo-dot"></span>AI Supplier Valuation Grid</h1>
-      <p>Mobile-first dashboard for intrinsic value modeling of AI infrastructure suppliers. Live prices refresh every 60 seconds via Finnhub. Your configuration saves automatically.</p>
+      <p>Mobile-first DCF dashboard for AI infrastructure suppliers. Real FCF from 10-K filings, plus live prices, P/E, and EV/EBITDA via Finnhub. Auto-saves.</p>
     </header>
 
     <div class="toolbar">
-      <button class="primary" id="addCompanyBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#0b1120" stroke-width="2" stroke-linecap="round" /></svg>Add company</button>
-      <button id="refreshNowBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /><path d="M5 13a7 7 0 0 0 11 4" stroke="#0b1220" stroke-width="2" stroke-linecap="round" /></svg>Refresh prices</button>
+      <button class="primary" id="addCompanyBtn">+ Add company</button>
+      <button id="refreshNowBtn">↻ Refresh</button>
+      <button id="setApiKeyBtn">🔑 Set API key</button>
       <select id="currencySelect"><option value="USD">USD</option></select>
-      <span style="font-size:0.75rem;color:var(--muted);">Live data: Finnhub</span>
+      <span id="statusLine" style="font-size:0.75rem;color:var(--muted);">Live data: Finnhub</span>
     </div>
 
     <div class="grid" id="companyGrid"></div>
 
-    <p class="footer-note">Client-side app for GitHub Pages. All modeling is local to your browser. Finnhub provides reliable prices (15-20 min delayed). Markets closed? Falls back to last price. Company list and assumptions auto-save to browser storage.</p>
+    <p class="footer-note">
+      <strong>Real DCF</strong>: FCF/share pulled from reported 10-K cash flow statements (Cash from Ops − CapEx ÷ diluted shares).
+      Financials cached 24h; prices &amp; multiples refresh every 60s. If a filing can't be parsed, falls back to P/E-based estimate (flagged with *).
+    </p>
 
     <div class="theme-toggle"><label><input type="checkbox" id="themeToggle" />Dark mode</label></div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'ai_supplier_last_prices_v1';
-    const COMPANIES_KEY = 'ai_supplier_companies_v1';
-    const THEME_KEY = 'ai_supplier_theme_v1';
+    const STORAGE_KEY   = 'ai_supplier_last_prices_v2';
+    const METRICS_KEY   = 'ai_supplier_last_metrics_v2';
+    const FINANCIALS_KEY= 'ai_supplier_last_financials_v1';
+    const COMPANIES_KEY = 'ai_supplier_companies_v2';
+    const THEME_KEY     = 'ai_supplier_theme_v1';
+    const APIKEY_KEY    = 'ai_supplier_finnhub_key_v1';
+    const FIN_TTL_MS    = 24 * 60 * 60 * 1000;
 
-    function loadLastPrices() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; } }
-    function saveLastPrices(obj) { localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
-    function loadCompanies() { try { return JSON.parse(localStorage.getItem(COMPANIES_KEY) || 'null'); } catch (e) { return null; } }
-    function saveCompanies() { localStorage.setItem(COMPANIES_KEY, JSON.stringify(companies)); }
-    function loadTheme() { return localStorage.getItem(THEME_KEY) || 'light'; }
-    function saveTheme(theme) { localStorage.setItem(THEME_KEY, theme); }
+    const load = (k, fb) => { try { return JSON.parse(localStorage.getItem(k) || fb); } catch { return JSON.parse(fb); } };
+    const save = (k, v)  => localStorage.setItem(k, JSON.stringify(v));
+
+    const loadLastPrices     = () => load(STORAGE_KEY, '{}');
+    const saveLastPrices     = o  => save(STORAGE_KEY, o);
+    const loadLastMetrics    = () => load(METRICS_KEY, '{}');
+    const saveLastMetrics    = o  => save(METRICS_KEY, o);
+    const loadLastFinancials = () => load(FINANCIALS_KEY, '{}');
+    const saveLastFinancials = o  => save(FINANCIALS_KEY, o);
+    const loadCompanies      = () => load(COMPANIES_KEY, 'null');
+    const saveCompanies      = () => save(COMPANIES_KEY, companies);
+    const loadTheme          = () => localStorage.getItem(THEME_KEY) || 'light';
+    const saveTheme          = t  => localStorage.setItem(THEME_KEY, t);
+    const loadApiKey         = () => localStorage.getItem(APIKEY_KEY) || '';
+    const saveApiKey         = k  => localStorage.setItem(APIKEY_KEY, k);
 
     const defaultCompanies = [
-      { ticker: "IFX", name: "Infineon Technologies", category: "Power ICs / Memory", profile: "Deep in the AI power-delivery stack; critical for GPU/CPU boards.", pe: 12.5, evEbitda: 8.2, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.12, discountRate: 0.09, margin: 0.18, years: 5 } },
-      { ticker: "STM", name: "STMicroelectronics", category: "Embedded Memory / Power", profile: "Essential embedded memory and power components for AI servers.", pe: 11.8, evEbitda: 7.9, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.10, discountRate: 0.09, margin: 0.20, years: 5 } },
-      { ticker: "DELL", name: "Dell Technologies", category: "AI Servers", profile: "Major AI server vendor with large hyperscaler exposure.", pe: 14.2, evEbitda: 6.5, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.15, discountRate: 0.10, margin: 0.08, years: 5 } },
-      { ticker: "WDC", name: "Western Digital", category: "NAND / Storage", profile: "Storage demand rises with AI clusters.", pe: 9.3, evEbitda: 5.2, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.11, discountRate: 0.10, margin: 0.15, years: 5 } },
-      { ticker: "ORCL", name: "Oracle", category: "AI Cloud Infrastructure", profile: "Cloud infrastructure provider with large AI-related capex.", pe: 18.5, evEbitda: 9.8, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.13, discountRate: 0.08, margin: 0.30, years: 5 } },
-      { ticker: "QCOM", name: "Qualcomm", category: "Mobile / Edge AI", profile: "Edge AI processors for mobile and IoT.", pe: 15.1, evEbitda: 7.4, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.12, discountRate: 0.09, margin: 0.27, years: 5 } },
+      { ticker: "TXN",  name: "Texas Instruments",  category: "Analog / Power Semis",    profile: "Analog & embedded processing leader; broad AI-adjacent power and signal chain exposure.", livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.08, discountRate: 0.09, fcfMargin: 0.28, terminalGrowth: 0.025, years: 5 } },
+      { ticker: "STM",  name: "STMicroelectronics", category: "Embedded Memory / Power", profile: "Essential embedded memory and power components for AI servers.",                              livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.10, discountRate: 0.09, fcfMargin: 0.12, terminalGrowth: 0.025, years: 5 } },
+      { ticker: "DELL", name: "Dell Technologies",  category: "AI Servers",              profile: "Major AI server vendor with large hyperscaler exposure.",                                       livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.15, discountRate: 0.10, fcfMargin: 0.05, terminalGrowth: 0.025, years: 5 } },
+      { ticker: "WDC",  name: "Western Digital",    category: "NAND / Storage",          profile: "Storage demand rises with AI clusters.",                                                        livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.11, discountRate: 0.10, fcfMargin: 0.08, terminalGrowth: 0.025, years: 5 } },
+      { ticker: "ORCL", name: "Oracle",             category: "AI Cloud Infrastructure", profile: "Cloud infrastructure provider with large AI-related capex.",                                    livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.13, discountRate: 0.08, fcfMargin: 0.20, terminalGrowth: 0.025, years: 5 } },
+      { ticker: "QCOM", name: "Qualcomm",           category: "Mobile / Edge AI",        profile: "Edge AI processors for mobile and IoT.",                                                        livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.12, discountRate: 0.09, fcfMargin: 0.22, terminalGrowth: 0.025, years: 5 } },
     ];
 
     let companies = [];
+    let apiKey = '';
 
-    async function fetchLivePrice(ticker) {
-      const url = "https://finnhub.io/api/v1/quote?symbol=" + encodeURIComponent(ticker);
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Network error");
-        const data = await res.json();
-        if (data.c !== undefined && data.c > 0) return data.c;
-        return null;
-      } catch (err) {
-        console.warn("Price fetch failed for", ticker, err);
-        return null;
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById('statusLine');
+      el.textContent = msg;
+      el.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+    }
+
+    async function fetchQuote(ticker) {
+      const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${encodeURIComponent(apiKey)}`);
+      if (!res.ok) throw new Error(`quote ${res.status}`);
+      const d = await res.json();
+      return (typeof d.c === 'number' && d.c > 0) ? d.c : null;
+    }
+
+    async function fetchMetrics(ticker) {
+      const res = await fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${encodeURIComponent(ticker)}&metric=all&token=${encodeURIComponent(apiKey)}`);
+      if (!res.ok) throw new Error(`metric ${res.status}`);
+      const d = await res.json();
+      const m = d.metric || {};
+      const pe        = m.peBasicExclExtraTTM ?? m.peTTM ?? m.peNormalizedAnnual ?? null;
+      const evEbitda  = m['enterpriseValueEbitdaTTM'] ?? m.evEbitdaTTM ?? m.currentEv_ebitdaTTM ?? null;
+      const sharesOut = m.sharesOutstanding ?? m.shareOutstanding ?? null;
+      return {
+        pe:        (typeof pe === 'number' && isFinite(pe)) ? pe : null,
+        evEbitda:  (typeof evEbitda === 'number' && isFinite(evEbitda)) ? evEbitda : null,
+        sharesOut: (typeof sharesOut === 'number' && isFinite(sharesOut) && sharesOut > 0) ? sharesOut : null,
+      };
+    }
+
+    async function fetchFinancialsReported(ticker) {
+      const res = await fetch(`https://finnhub.io/api/v1/stock/financials-reported?symbol=${encodeURIComponent(ticker)}&freq=annual&token=${encodeURIComponent(apiKey)}`);
+      if (!res.ok) throw new Error(`financials ${res.status}`);
+      return await res.json();
+    }
+
+    const CFO_CONCEPTS = [
+      'NetCashProvidedByUsedInOperatingActivities',
+      'NetCashProvidedByOperatingActivities',
+      'CashFlowFromOperatingActivities',
+      'CashProvidedByUsedInOperatingActivities',
+    ];
+    const CAPEX_CONCEPTS = [
+      'PaymentsToAcquirePropertyPlantAndEquipment',
+      'PaymentsForCapitalImprovements',
+      'PaymentsToAcquireProductiveAssets',
+      'PurchaseOfPropertyAndEquipment',
+      'CapitalExpenditures',
+    ];
+    const SHARES_CONCEPTS = [
+      'WeightedAverageNumberOfDilutedSharesOutstanding',
+      'WeightedAverageNumberOfSharesOutstandingDiluted',
+      'WeightedAverageNumberOfSharesOutstandingBasic',
+      'CommonStockSharesOutstanding',
+    ];
+
+    function findConceptValue(reportSection, concepts) {
+      if (!Array.isArray(reportSection)) return null;
+      for (const concept of concepts) {
+        const exact = reportSection.find(x => x.concept === concept);
+        if (exact && typeof exact.value === 'number' && isFinite(exact.value)) return exact.value;
       }
+      for (const item of reportSection) {
+        if (typeof item.label !== 'string' || typeof item.value !== 'number') continue;
+        const label = item.label.toLowerCase();
+        if (concepts === CFO_CONCEPTS && label.includes('operating') && label.includes('cash') && !label.includes('per share')) return item.value;
+        if (concepts === CAPEX_CONCEPTS && (label.includes('capital expenditure') || (label.includes('property') && label.includes('equipment') && label.includes('purchase')))) return item.value;
+        if (concepts === SHARES_CONCEPTS && label.includes('diluted') && label.includes('shares')) return item.value;
+      }
+      return null;
+    }
+
+    function extractFcfPerShare(financialsJson, fallbackShares) {
+      if (!financialsJson || !Array.isArray(financialsJson.data) || financialsJson.data.length === 0) return null;
+      const sorted = [...financialsJson.data].sort((a, b) => (b.year || 0) - (a.year || 0));
+      for (const filing of sorted) {
+        const report = filing.report || {};
+        const cf = report.cf || [];
+        const ic = report.ic || [];
+        let cfo   = findConceptValue(cf, CFO_CONCEPTS);
+        let capex = findConceptValue(cf, CAPEX_CONCEPTS);
+        if (typeof capex === 'number') capex = Math.abs(capex);
+        let shares = findConceptValue(ic, SHARES_CONCEPTS);
+        if (!shares || shares <= 0) shares = fallbackShares || null;
+        if (typeof cfo === 'number' && typeof capex === 'number' && shares && shares > 0) {
+          const fcf = cfo - capex;
+          const fcfPerShare = fcf / shares;
+          if (isFinite(fcfPerShare)) return { fcfPerShare, year: filing.year || null, cfo, capex, shares, fcf };
+        }
+      }
+      return null;
     }
 
     async function refreshAllPrices() {
-      const grid = document.getElementById("companyGrid");
-      const cards = grid.querySelectorAll(".card");
-      const lastPrices = loadLastPrices();
+      if (!apiKey) { setStatus('⚠ No Finnhub API key — click "Set API key"', true); return; }
+      setStatus('Refreshing prices, metrics & financials…');
 
-      for (let i = 0; i < companies.length; i++) {
-        const c = companies[i];
-        const price = await fetchLivePrice(c.ticker);
-        if (price != null) {
-          c.livePrice = price;
-          c.lastKnownPrice = price;
-          c.lastUpdated = new Date().toISOString();
-          lastPrices[c.ticker] = { price: price, ts: c.lastUpdated };
-          saveLastPrices(lastPrices);
+      const lastPrices     = loadLastPrices();
+      const lastMetrics    = loadLastMetrics();
+      const lastFinancials = loadLastFinancials();
+      const now = Date.now();
+
+      const results = await Promise.all(companies.map(async c => {
+        const out = { price: null, pe: null, evEbitda: null, sharesOut: null, fcfPerShare: null, fcfYear: null };
+        try { out.price = await fetchQuote(c.ticker); } catch (e) { console.warn(c.ticker, 'quote fail', e); }
+        try { const m = await fetchMetrics(c.ticker); out.pe = m.pe; out.evEbitda = m.evEbitda; out.sharesOut = m.sharesOut; }
+        catch (e) { console.warn(c.ticker, 'metric fail', e); }
+
+        const cached = lastFinancials[c.ticker];
+        let financialsJson = null;
+        if (cached && cached.raw && (now - cached.ts) < FIN_TTL_MS) {
+          financialsJson = cached.raw;
         } else {
-          c.livePrice = null;
-          if (lastPrices[c.ticker]) {
-            c.lastKnownPrice = lastPrices[c.ticker].price;
-            c.lastUpdated = lastPrices[c.ticker].ts;
-          }
+          try {
+            financialsJson = await fetchFinancialsReported(c.ticker);
+            lastFinancials[c.ticker] = { raw: financialsJson, ts: now };
+          } catch (e) { console.warn(c.ticker, 'financials fail', e); }
         }
+        if (financialsJson) {
+          const fcfExtract = extractFcfPerShare(financialsJson, out.sharesOut);
+          if (fcfExtract) { out.fcfPerShare = fcfExtract.fcfPerShare; out.fcfYear = fcfExtract.year; }
+        }
+        return out;
+      }));
+
+      let priceErr = 0, fcfMissing = 0;
+      results.forEach((r, i) => {
+        const c = companies[i];
+        if (r.price != null) {
+          c.livePrice = r.price;
+          c.lastKnownPrice = r.price;
+          c.lastUpdated = new Date().toISOString();
+          lastPrices[c.ticker] = { price: r.price, ts: c.lastUpdated };
+        } else {
+          priceErr++;
+          c.livePrice = null;
+          if (lastPrices[c.ticker]) { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
+        }
+        if (r.pe != null || r.evEbitda != null) {
+          c.pe = r.pe ?? c.pe;
+          c.evEbitda = r.evEbitda ?? c.evEbitda;
+          lastMetrics[c.ticker] = { pe: c.pe, evEbitda: c.evEbitda, ts: new Date().toISOString() };
+        } else if (lastMetrics[c.ticker]) {
+          c.pe = c.pe ?? lastMetrics[c.ticker].pe;
+          c.evEbitda = c.evEbitda ?? lastMetrics[c.ticker].evEbitda;
+        }
+        if (r.fcfPerShare != null) {
+          c.fcfPerShare = r.fcfPerShare;
+          c.fcfSourceYear = r.fcfYear;
+        } else if (c.fcfPerShare == null) {
+          fcfMissing++;
+        }
+      });
+
+      saveLastPrices(lastPrices);
+      saveLastMetrics(lastMetrics);
+      saveLastFinancials(lastFinancials);
+
+      const grid = document.getElementById('companyGrid');
+      const cards = grid.querySelectorAll('.card');
+      companies.forEach((c, i) => {
         const card = cards[i];
-        if (!card) continue;
+        if (!card) return;
         updatePriceDisplay(card, c);
+        updateMetricsDisplay(card, c);
         updateIntrinsicAndGauge(card, c);
+      });
+
+      const parts = [`Updated ${new Date().toLocaleTimeString()}`];
+      if (priceErr) parts.push(`${priceErr} price err`);
+      if (fcfMissing) parts.push(`${fcfMissing} using proxy FCF`);
+      setStatus(parts.join(' · '), priceErr > 0);
+    }
+
+    function proxyFcfPerShare(price, pe, fcfMargin) {
+      if (!price || price <= 0) return null;
+      if (pe && pe > 0 && isFinite(pe)) {
+        const eps = price / pe;
+        return eps * ((fcfMargin || 0.10) / 0.15);
       }
+      return price * (fcfMargin || 0.05) * 0.4;
     }
 
-    function computeIntrinsicValue(currentPrice, assumptions) {
-      if (!currentPrice || currentPrice <= 0) return null;
-      const { growthRate, discountRate, years } = assumptions;
-      const growthFactor = Math.pow(1 + (growthRate || 0), years || 5);
-      const discountFactor = Math.pow(1 + (discountRate || 0.1), years || 5);
-      return currentPrice * (growthFactor / discountFactor);
+    function computeDCF(price, a, pe, realFcfPerShare) {
+      if (!price || price <= 0) return { intrinsic: null, note: 'no price', usingReal: false };
+      const g   = a.growthRate ?? 0;
+      const r   = a.discountRate ?? 0.09;
+      const N   = Math.max(1, a.years ?? 5);
+      let   gT  = a.terminalGrowth ?? 0.025;
+      const fcfM = a.fcfMargin ?? 0.10;
+
+      let capped = false;
+      if (gT >= r) { gT = r - 0.005; capped = true; }
+
+      const usingReal = (typeof realFcfPerShare === 'number' && isFinite(realFcfPerShare) && realFcfPerShare > 0);
+      const fcf0 = usingReal ? realFcfPerShare : proxyFcfPerShare(price, pe, fcfM);
+      if (!fcf0 || fcf0 <= 0) return { intrinsic: null, note: 'no FCF', usingReal };
+
+      let pvSum = 0, fcfN = 0;
+      for (let t = 1; t <= N; t++) {
+        const fcfT = fcf0 * Math.pow(1 + g, t);
+        pvSum += fcfT / Math.pow(1 + r, t);
+        if (t === N) fcfN = fcfT;
+      }
+      const tv   = (fcfN * (1 + gT)) / (r - gT);
+      const pvTv = tv / Math.pow(1 + r, N);
+
+      const notes = [];
+      if (capped) notes.push('terminal g capped at r-0.5%');
+      if (!usingReal) notes.push('proxy FCF from P/E');
+      return { intrinsic: pvSum + pvTv, note: notes.join('; ') || null, usingReal, fcf0 };
     }
 
-    function classifySignal(currentPrice, intrinsic) {
-      if (!currentPrice || !intrinsic) return { label: "wait", pos: 50 };
-      const diff = (intrinsic - currentPrice) / currentPrice;
-      if (diff >= 0.25) return { label: "buy", pos: 80 };
-      else if (diff >= 0.05) return { label: "hold", pos: 60 };
-      else if (diff <= -0.15) return { label: "sell", pos: 20 };
-      else return { label: "wait", pos: 45 };
+    function classifySignal(price, intrinsic) {
+      if (!price || !intrinsic) return { label: 'wait', pos: 50 };
+      const diff = (intrinsic - price) / price;
+      if (diff >=  0.25) return { label: 'buy',  pos: 80 };
+      if (diff >=  0.05) return { label: 'hold', pos: 60 };
+      if (diff <= -0.15) return { label: 'sell', pos: 20 };
+      return { label: 'wait', pos: 45 };
     }
 
-    function createCard(company, index) {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.dataset.index = index;
-
+    function createCard(company) {
+      const card = document.createElement('div');
+      card.className = 'card';
       card.innerHTML = `
         <div class="card-header">
           <div class="card-header-left">
             <div><div class="ticker">${company.ticker}</div><div class="company-name">${company.name}</div></div>
-            <button class="card-delete-btn" title="Remove this company">×</button>
+            <button class="card-delete-btn" title="Remove">×</button>
           </div>
           <div style="text-align:right;" class="live-price">
             <div class="price-row"><div class="price-value">N/A</div><div class="price-tag">live</div></div>
@@ -216,127 +398,155 @@
         <div class="section-row">
           <div class="profile-text">${company.profile}</div>
           <div class="metrics-row">
-            <div class="metric"><span>P/E</span><span class="value">${company.pe != null ? company.pe : "N/A"}</span></div>
-            <div class="metric"><span>EV/EBITDA</span><span class="value">${company.evEbitda != null ? company.evEbitda : "N/A"}</span></div>
+            <div class="metric"><span>P/E (TTM)</span><span class="value pe-value">N/A</span></div>
+            <div class="metric"><span>EV/EBITDA</span><span class="value ev-value">N/A</span></div>
+            <div class="metric"><span>FCF/share</span><span class="value fcf-value">N/A</span></div>
+            <div class="metric"><span>Source</span><span class="value fcf-source">—</span></div>
           </div>
           <div class="inputs-row">
-            <div class="input-group"><label>Growth rate (annual, %)</label><input type="number" step="0.1" min="-50" max="50" value="${(company.assumptions.growthRate * 100).toFixed(1)}" data-field="growthRate" /></div>
-            <div class="input-group"><label>Discount rate (%, WACC)</label><input type="number" step="0.1" min="0" max="50" value="${(company.assumptions.discountRate * 100).toFixed(1)}" data-field="discountRate" /></div>
-            <div class="input-group"><label>Margin (net, %)</label><input type="number" step="0.1" min="-50" max="80" value="${(company.assumptions.margin * 100).toFixed(1)}" data-field="margin" /></div>
-            <div class="input-group"><label>Horizon (years)</label><input type="number" step="1" min="1" max="15" value="${company.assumptions.years}" data-field="years" /></div>
+            <div class="input-group"><label>Growth rate (%)</label><input type="number" step="0.1" min="-50" max="50" value="${(company.assumptions.growthRate*100).toFixed(1)}" data-field="growthRate" /></div>
+            <div class="input-group"><label>Discount rate (%)</label><input type="number" step="0.1" min="0" max="50" value="${(company.assumptions.discountRate*100).toFixed(1)}" data-field="discountRate" /></div>
+            <div class="input-group"><label>FCF margin (%) *proxy only</label><input type="number" step="0.1" min="-50" max="80" value="${(company.assumptions.fcfMargin*100).toFixed(1)}" data-field="fcfMargin" /></div>
+            <div class="input-group"><label>Terminal g (%)</label><input type="number" step="0.1" min="0" max="10" value="${(company.assumptions.terminalGrowth*100).toFixed(1)}" data-field="terminalGrowth" /></div>
+            <div class="input-group"><label>Horizon (yrs)</label><input type="number" step="1" min="1" max="15" value="${company.assumptions.years}" data-field="years" /></div>
           </div>
-          <div class="intrinsic-row"><span>Intrinsic value</span><span class="value intrinsic-value">N/A</span></div>
+          <div class="intrinsic-row"><span>Intrinsic value (DCF)</span><span class="value intrinsic-value">N/A</span></div>
           <div class="gauge-row"><span class="gauge-label">Signal</span><div class="gauge-bar"><div class="gauge-indicator"></div></div><span class="gauge-text wait">wait</span></div>
-        </div>
-      `;
+        </div>`;
 
-      const deleteBtn = card.querySelector('.card-delete-btn');
-      deleteBtn.addEventListener('click', () => {
-        if (confirm(`Remove ${company.ticker} from your dashboard?`)) {
-          companies.splice(index, 1);
+      card.querySelector('.card-delete-btn').addEventListener('click', () => {
+        if (confirm(`Remove ${company.ticker}?`)) {
+          const idx = companies.indexOf(company);
+          if (idx > -1) companies.splice(idx, 1);
           saveCompanies();
           renderGrid();
         }
       });
 
-      const inputs = card.querySelectorAll(".input-group input");
-      inputs.forEach((input) => {
-        input.addEventListener("input", () => {
-          const field = input.dataset.field;
-          let val = parseFloat(input.value);
-          if (isNaN(val)) return;
-          if (field === "growthRate" || field === "discountRate" || field === "margin") {
-            company.assumptions[field] = val / 100;
-          } else if (field === "years") {
-            company.assumptions[field] = Math.max(1, Math.round(val));
-          }
+      card.querySelectorAll('.input-group input').forEach(input => {
+        input.addEventListener('input', () => {
+          const f = input.dataset.field;
+          const v = parseFloat(input.value);
+          if (isNaN(v)) return;
+          if (['growthRate','discountRate','fcfMargin','terminalGrowth'].includes(f)) company.assumptions[f] = v / 100;
+          else if (f === 'years') company.assumptions.years = Math.max(1, Math.round(v));
           saveCompanies();
           updateIntrinsicAndGauge(card, company);
         });
       });
-
       return card;
     }
 
-    function updatePriceDisplay(card, company) {
-      const priceValueEl = card.querySelector('.price-value');
-      const priceTagEl = card.querySelector('.price-tag');
-      const metaEl = card.querySelector('.price-meta');
-
-      if (company.livePrice != null) {
-        priceValueEl.textContent = '$' + company.livePrice.toFixed(2);
-        priceTagEl.textContent = 'live';
-        metaEl.textContent = new Date(company.lastUpdated).toLocaleString();
-      } else if (company.lastKnownPrice != null) {
-        priceValueEl.textContent = '$' + company.lastKnownPrice.toFixed(2);
-        priceTagEl.textContent = 'last';
-        metaEl.textContent = 'as of ' + new Date(company.lastUpdated).toLocaleString();
-      } else {
-        priceValueEl.textContent = 'N/A';
-        priceTagEl.textContent = '—';
-        metaEl.textContent = '';
-      }
+    function formatWhen(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      return isNaN(d.getTime()) ? '' : d.toLocaleString();
     }
 
-    function updateIntrinsicAndGauge(card, company) {
-      const intrinsicEl = card.querySelector('.intrinsic-value');
-      const gaugeIndicator = card.querySelector('.gauge-indicator');
-      const gaugeText = card.querySelector('.gauge-text');
+    function updatePriceDisplay(card, c) {
+      const v = card.querySelector('.price-value');
+      const t = card.querySelector('.price-tag');
+      const m = card.querySelector('.price-meta');
+      if (c.livePrice != null) {
+        v.textContent = '$' + c.livePrice.toFixed(2); t.textContent = 'live'; m.textContent = formatWhen(c.lastUpdated);
+      } else if (c.lastKnownPrice != null) {
+        v.textContent = '$' + c.lastKnownPrice.toFixed(2); t.textContent = 'last';
+        const w = formatWhen(c.lastUpdated); m.textContent = w ? 'as of ' + w : '';
+      } else { v.textContent = 'N/A'; t.textContent = '—'; m.textContent = ''; }
+    }
 
-      const priceToUse = company.livePrice != null ? company.livePrice : company.lastKnownPrice;
-      const intrinsic = computeIntrinsicValue(priceToUse, company.assumptions);
-      if (intrinsicEl) {
-        intrinsicEl.textContent = intrinsic != null ? '$' + intrinsic.toFixed(2) : 'N/A';
+    function updateMetricsDisplay(card, c) {
+      card.querySelector('.pe-value').textContent  = (typeof c.pe === 'number' && isFinite(c.pe)) ? c.pe.toFixed(1) : 'N/A';
+      card.querySelector('.ev-value').textContent  = (typeof c.evEbitda === 'number' && isFinite(c.evEbitda)) ? c.evEbitda.toFixed(1) : 'N/A';
+      card.querySelector('.fcf-value').textContent = (typeof c.fcfPerShare === 'number' && isFinite(c.fcfPerShare)) ? ('$' + c.fcfPerShare.toFixed(2)) : 'N/A';
+      card.querySelector('.fcf-source').textContent = c.fcfSourceYear ? ('10-K ' + c.fcfSourceYear) : (c.fcfPerShare != null ? 'reported' : 'proxy');
+    }
+
+    function updateIntrinsicAndGauge(card, c) {
+      const iEl = card.querySelector('.intrinsic-value');
+      const gI  = card.querySelector('.gauge-indicator');
+      const gT  = card.querySelector('.gauge-text');
+      const price = c.livePrice ?? c.lastKnownPrice;
+      const { intrinsic, note, usingReal } = computeDCF(price, c.assumptions, c.pe, c.fcfPerShare);
+      if (iEl) {
+        iEl.textContent = intrinsic != null ? ('$' + intrinsic.toFixed(2) + (note ? ' *' : '')) : 'N/A';
+        iEl.title = note || (usingReal ? 'Using reported FCF/share' : '');
+        iEl.style.color = usingReal ? 'var(--success)' : '';
       }
-
-      const signal = classifySignal(priceToUse, intrinsic);
-      if (gaugeIndicator) gaugeIndicator.style.left = signal.pos + '%';
-      if (gaugeText) { gaugeText.textContent = signal.label; gaugeText.className = 'gauge-text ' + signal.label; }
+      const s = classifySignal(price, intrinsic);
+      if (gI) gI.style.left = s.pos + '%';
+      if (gT) { gT.textContent = s.label; gT.className = 'gauge-text ' + s.label; }
     }
 
     function renderGrid() {
       const grid = document.getElementById('companyGrid');
       grid.innerHTML = '';
-      companies.forEach((c, i) => { const card = createCard(c, i); grid.appendChild(card); updatePriceDisplay(card, c); updateIntrinsicAndGauge(card, c); });
+      companies.forEach(c => {
+        const card = createCard(c);
+        grid.appendChild(card);
+        updatePriceDisplay(card, c);
+        updateMetricsDisplay(card, c);
+        updateIntrinsicAndGauge(card, c);
+      });
     }
 
     function addCompanyPrompt() {
-      const ticker = prompt('Enter ticker symbol (e.g., NVDA):'); if (!ticker) return;
-      const name = prompt('Enter company name:');
-      const category = prompt('Enter category (e.g., GPUs / AI hardware):');
-      const profile = prompt('Enter a short profile/description:') || 'User-added company; profile to be refined.';
-
-      const newCompany = { ticker: ticker.trim().toUpperCase(), name: name || ticker.trim().toUpperCase(), category: category || 'Custom', profile, pe: null, evEbitda: null, livePrice: null, lastKnownPrice: null, lastUpdated: null, assumptions: { growthRate: 0.12, discountRate: 0.09, margin: 0.15, years: 5 } };
-      companies.push(newCompany);
+      const ticker = (prompt('Enter ticker (e.g., NVDA):') || '').trim().toUpperCase();
+      if (!ticker) return;
+      if (companies.some(c => c.ticker === ticker)) { alert(`${ticker} already added.`); return; }
+      const name     = prompt('Company name:') || ticker;
+      const category = prompt('Category:') || 'Custom';
+      const profile  = prompt('Short profile:') || 'User-added company.';
+      companies.push({ ticker, name, category, profile, livePrice: null, lastKnownPrice: null, lastUpdated: null, pe: null, evEbitda: null, fcfPerShare: null, fcfSourceYear: null,
+        assumptions: { growthRate: 0.10, discountRate: 0.09, fcfMargin: 0.15, terminalGrowth: 0.025, years: 5 } });
       saveCompanies();
       renderGrid();
       refreshAllPrices();
     }
 
+    function promptForApiKey() {
+      const k = prompt('Paste your Finnhub API key:', loadApiKey());
+      if (k === null) return;
+      apiKey = k.trim();
+      saveApiKey(apiKey);
+      refreshAllPrices();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const saved = loadCompanies();
-      if (saved && saved.length > 0) {
-        companies = saved;
-      } else {
-        companies = JSON.parse(JSON.stringify(defaultCompanies));
-      }
+      companies = (saved && saved.length) ? saved : JSON.parse(JSON.stringify(defaultCompanies));
 
-      const lastPrices = loadLastPrices();
       companies.forEach(c => {
-        if (lastPrices[c.ticker]) { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
+        c.assumptions = c.assumptions || {};
+        if (c.assumptions.fcfMargin      == null) c.assumptions.fcfMargin      = 0.15;
+        if (c.assumptions.terminalGrowth == null) c.assumptions.terminalGrowth = 0.025;
+        if (c.assumptions.years          == null) c.assumptions.years          = 5;
+        if (c.fcfPerShare === undefined)   c.fcfPerShare = null;
+        if (c.fcfSourceYear === undefined) c.fcfSourceYear = null;
       });
 
+      const lastPrices  = loadLastPrices();
+      const lastMetrics = loadLastMetrics();
+      companies.forEach(c => {
+        if (lastPrices[c.ticker])  { c.lastKnownPrice = lastPrices[c.ticker].price; c.lastUpdated = lastPrices[c.ticker].ts; }
+        if (lastMetrics[c.ticker]) { c.pe = lastMetrics[c.ticker].pe; c.evEbitda = lastMetrics[c.ticker].evEbitda; }
+      });
+
+      apiKey = loadApiKey();
       renderGrid();
+
       document.getElementById('addCompanyBtn').addEventListener('click', addCompanyPrompt);
       document.getElementById('refreshNowBtn').addEventListener('click', refreshAllPrices);
+      document.getElementById('setApiKeyBtn').addEventListener('click', promptForApiKey);
 
-      const theme = loadTheme();
-      const body = document.body;
       const toggle = document.getElementById('themeToggle');
-      if (theme === 'dark') { body.classList.add('dark-theme'); toggle.checked = true; }
-      else { body.classList.remove('dark-theme'); toggle.checked = false; }
-      toggle.addEventListener('change', (e) => { if (e.target.checked) { body.classList.add('dark-theme'); saveTheme('dark'); } else { body.classList.remove('dark-theme'); saveTheme('light'); } });
+      if (loadTheme() === 'dark') { document.body.classList.add('dark-theme'); toggle.checked = true; }
+      toggle.addEventListener('change', e => {
+        document.body.classList.toggle('dark-theme', e.target.checked);
+        saveTheme(e.target.checked ? 'dark' : 'light');
+      });
 
+      if (!apiKey) setStatus('⚠ No Finnhub API key — click "Set API key"', true);
       setInterval(refreshAllPrices, 60000);
       refreshAllPrices();
     });
